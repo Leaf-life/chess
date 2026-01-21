@@ -3,6 +3,7 @@ package chess;
 import javax.swing.plaf.ColorUIResource;
 import java.security.KeyStore;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Represents a single chess piece
@@ -19,6 +20,20 @@ public class ChessPiece {
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         Color = pieceColor;
         Type = type;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessPiece that = (ChessPiece) o;
+        return Color == that.Color && Type == that.Type && Objects.equals(Moves, that.Moves);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(Color, Type, Moves);
     }
 
     /**
@@ -72,6 +87,52 @@ public class ChessPiece {
         }
         return true;
     }
+
+    private boolean check(ChessBoard board, ChessPosition myPosition, int row, int col, int offset_r, int offset_c, ChessPiece.PieceType promo){
+        if (onBoard(row + offset_r, col + offset_c) && onPiece(board, new ChessPosition(row + offset_r, col + offset_c))) {
+            Moves.add(new ChessMove(myPosition, new ChessPosition(row + offset_r, col + offset_c), promo));
+        } else {
+            return false;
+        }
+        if (!cont(board, new ChessPosition(row + offset_r, col + offset_c))) {
+            return false;
+        }
+        return true;
+    }
+
+    private void rook(ChessBoard board, ChessPosition myPosition, int row, int col){
+        boolean change = false;
+        for (int i = -1; i < 2; i = i + 2) {
+            for (int j = -1; j < 2; j = j + 2) {
+                boolean cont = true;
+                int sum_r = 0;
+                int sum_c = 0;
+                while (cont) {
+                    if (change){
+                        sum_r = sum_r + i;
+                    }else {
+                        sum_c = sum_c + j;
+                    }
+                    cont = check(board, myPosition, row, col, sum_r, sum_c, null);
+                }
+                change = !change;
+            }
+        }
+    }
+    private void bishop(ChessBoard board, ChessPosition myPosition, int row, int col){
+        for (int i = -1; i < 2; i = i + 2) {
+            for (int j = -1; j < 2; j = j + 2) {
+                boolean cont = true;
+                int sum_r = 0;
+                int sum_c = 0;
+                while (cont) {
+                    sum_r = sum_r + i;
+                    sum_c = sum_c + j;
+                    cont = check(board, myPosition, row, col, sum_r, sum_c, null);
+                }
+            }
+        }
+    }
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -94,65 +155,38 @@ public class ChessPiece {
             }
                 break;
             case QUEEN: {
-                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                    rook(board, myPosition, row, col);
+                    bishop(board, myPosition, row, col);
             }
                 break;
             case ROOK: {
-                boolean change = false;
-                for (int i = -1; i < 2; i = i + 2) {
-                    for (int j = -1; j < 2; j = j + 2) {
-                        boolean cont = true;
-                        int sum_r = 0;
-                        int sum_c = 0;
-                        while (cont) {
-                            if (change){
-                                sum_r = sum_r + i;
-                            }else {
-                                sum_c = sum_c + j;
-                            }
-                            if (onBoard(row + sum_r, col + sum_c) && onPiece(board, new ChessPosition(row + sum_r, col + sum_c))) {
-                                Moves.add(new ChessMove(myPosition, new ChessPosition(row + sum_r, col + sum_c), null));
-                            } else {
-                                cont = false;
-                            }
-                            if (!cont(board, new ChessPosition(row + sum_r, col + sum_c))) {
-                                cont = false;
-                            }
-                        }
-                        change = !change;
-                    }
-                }
+                rook(board, myPosition, row, col);
             }
                 break;
             case BISHOP: {
-                for (int i = -1; i < 2; i = i + 2) {
-                    for (int j = -1; j < 2; j = j + 2) {
-                        boolean cont = true;
-                        int sum_r = 0;
-                        int sum_c = 0;
-                        while (cont) {
-                            sum_r = sum_r + i;
-                            sum_c = sum_c + j;
-                            if (onBoard(row + sum_r, col + sum_c) && onPiece(board, new ChessPosition(row + sum_r, col + sum_c))) {
-                                Moves.add(new ChessMove(myPosition, new ChessPosition(row + sum_r, col + sum_c), null));
-                            } else {
-                                cont = false;
-                            }
-                            if (!cont(board, new ChessPosition(row + sum_r, col + sum_c))) {
-                                cont = false;
-                            }
-                        }
-                }
+                bishop(board, myPosition, row, col);
+            }
                 break;
             case KNIGHT: {
-                for (int i = 9; i > 0; i--) {
-                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                for (int i = -1; i < 2; i = i + 2){
+                    check(board, myPosition, row, col, -3, i, null);
+                    check(board, myPosition, row, col, i, 3, null);
                 }
             }
                 break;
             case PAWN: {
-                for (int i = 9; i > 0; i--) {
-                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                int direction = -1;
+                if (Color == ChessGame.TeamColor.WHITE){
+                    direction = 1;
+                }
+                boolean promotion = false;
+                ChessPiece.PieceType promo = null;
+
+                check(board, myPosition, row, col, direction, 0, promo);
+                for (int i = -1; i< 2; i = i + 2) {
+                    if (onPiece(board, new ChessPosition(row+1, col+i))){
+                        check(board, myPosition, row, col, direction, i, promo);
+                    }
                 }
             }
                 break;
