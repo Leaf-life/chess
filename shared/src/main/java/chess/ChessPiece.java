@@ -133,6 +133,15 @@ public class ChessPiece {
             }
         }
     }
+
+    private void pawnCheck(ChessBoard board, ChessPosition myPosition, int row, int col, int direction, ChessPiece.PieceType promo){
+        check(board, myPosition, row, col, direction, 0, promo);
+        for (int i = -1; i< 2; i = i + 2) {
+            if (onPiece(board, new ChessPosition(row+1, col+i))){
+                check(board, myPosition, row, col, direction, i, promo);
+            }
+        }
+    }
     /**
      * Calculates all the positions a chess piece can move to
      * Does not take into account moves that are illegal due to leaving the king in
@@ -175,19 +184,17 @@ public class ChessPiece {
             }
                 break;
             case PAWN: {
+                boolean promotion = false;
                 int direction = -1;
                 if (Color == ChessGame.TeamColor.WHITE){
                     direction = 1;
                 }
-                boolean promotion = false;
-                ChessPiece.PieceType promo = null;
-
-                check(board, myPosition, row, col, direction, 0, promo);
-                for (int i = -1; i< 2; i = i + 2) {
-                    if (onPiece(board, new ChessPosition(row+1, col+i))){
-                        check(board, myPosition, row, col, direction, i, promo);
-                    }
+                if ((row == 2 && direction == -1) || (row == 7 && direction == 1)){
+                    promotion = true;
                 }
+                ChessPiece.PieceType promo = null;
+                pawnCheck(board, myPosition, row, col, direction, promo);
+
             }
                 break;
         }
