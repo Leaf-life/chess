@@ -13,6 +13,7 @@ public class ChessPiece {
 
     private ChessGame.TeamColor Color;
     private ChessPiece.PieceType Type;
+    private Collection<ChessMove> Moves;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         Color = pieceColor;
@@ -54,18 +55,48 @@ public class ChessPiece {
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         switch(Type){
-            case KING ->
+            case KING: {
+                for (int i = -1; i < 2; i++) {
+                    for (int j = -1; j < 2; j++){
+                        if (i != 0 && j != 0 && myPosition.getRow() + i >= 0 && myPosition.getRow() + i < 8
+                        && myPosition.getColumn() + 1 >= 0 && myPosition.getColumn() + 1 < 8) {
+                            Moves.add(new ChessMove(myPosition,
+                                    new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + 1),
+                                    null));
+                        }
+                    }
+                }
+            }
                 break;
-            case QUEEN ->
+            case QUEEN: {
+                    Moves.add(new ChessMove(myPosition, myPosition, null));
+            }
                 break;
-            case ROOK ->
+            case ROOK: {
+                for (int i = 9; i > 0; i--) {
+                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                }
+            }
                 break;
-            case BISHOP ->
+            case BISHOP: {
+                for (int i = 9; i > 0; i--) {
+                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                }
+            }
                 break;
-            case KNIGHT ->
+            case KNIGHT: {
+                for (int i = 9; i > 0; i--) {
+                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                }
+            }
                 break;
-            case PAWN ->
+            case PAWN: {
+                for (int i = 9; i > 0; i--) {
+                    Moves.add(new ChessMove(myPosition, myPosition, null));
+                }
+            }
                 break;
         }
+        return Moves;
     }
 }
