@@ -16,9 +16,7 @@ public class ChessMove {
                      ChessPiece.PieceType promotionPiece) {
         s_Pos = startPosition;
         e_Pos = endPosition;
-        if ChessPiece.getPieceType() == ChessPiece.PieceType.pawn{
-            promotion = promotionPiece;
-        }
+        promotion = promotionPiece;
     }
 
     /**

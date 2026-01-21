@@ -55,7 +55,6 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         switch(Type){
             case KING ->
-                Set<ChessMove> = new HashSet<ChessMove>();
                 break;
             case QUEEN ->
                 break;
