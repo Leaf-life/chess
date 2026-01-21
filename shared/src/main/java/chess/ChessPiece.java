@@ -53,6 +53,20 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+        switch(Type){
+            case KING ->
+                Set<ChessMove> = new HashSet<ChessMove>();
+                break;
+            case QUEEN ->
+                break;
+            case ROOK ->
+                break;
+            case BISHOP ->
+                break;
+            case KNIGHT ->
+                break;
+            case PAWN ->
+                break;
+        }
     }
 }
