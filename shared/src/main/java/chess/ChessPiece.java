@@ -2,7 +2,9 @@ package chess;
 
 import javax.swing.plaf.ColorUIResource;
 import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Objects;
 
 /**
@@ -15,7 +17,7 @@ public class ChessPiece {
 
     private ChessGame.TeamColor Color;
     private ChessPiece.PieceType Type;
-    private Collection<ChessMove> Moves;
+    private Collection<ChessMove> Moves = new ArrayList<>();
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         Color = pieceColor;
@@ -63,7 +65,7 @@ public class ChessPiece {
     }
 
     private boolean onBoard(int x_pos, int y_pos){
-        if (x_pos <= 0 || y_pos <= 0){
+        if (x_pos < 1 || y_pos < 1){
             return false;
         } else if (x_pos > 8 || y_pos > 8) {
             return false;
@@ -89,15 +91,18 @@ public class ChessPiece {
     }
 
     private boolean check(ChessBoard board, ChessPosition myPosition, int row, int col, int offset_r, int offset_c, ChessPiece.PieceType promo){
-        if (onBoard(row + offset_r, col + offset_c) && onPiece(board, new ChessPosition(row + offset_r, col + offset_c))) {
-            Moves.add(new ChessMove(myPosition, new ChessPosition(row + offset_r, col + offset_c), promo));
-        } else {
-            return false;
+        if (onBoard(row + offset_r, col + offset_c)) {
+            if (onPiece(board, new ChessPosition(row + offset_r, col + offset_c))) {
+                Moves.add(new ChessMove(myPosition, new ChessPosition(row + offset_r, col + offset_c), promo));
+            } else {
+                return false;
+            }
+            if (!cont(board, new ChessPosition(row + offset_r, col + offset_c))) {
+                return false;
+            }
+            return true;
         }
-        if (!cont(board, new ChessPosition(row + offset_r, col + offset_c))) {
-            return false;
-        }
-        return true;
+        return false;
     }
 
     private void rook(ChessBoard board, ChessPosition myPosition, int row, int col){
@@ -137,7 +142,7 @@ public class ChessPiece {
     private void pawnCheck(ChessBoard board, ChessPosition myPosition, int row, int col, int direction, ChessPiece.PieceType promo){
         check(board, myPosition, row, col, direction, 0, promo);
         for (int i = -1; i< 2; i = i + 2) {
-            if (onPiece(board, new ChessPosition(row+1, col+i))){
+            if (onBoard(row+1, col+i) && onPiece(board, new ChessPosition(row+1, col+i))){
                 check(board, myPosition, row, col, direction, i, promo);
             }
         }
@@ -191,9 +196,19 @@ public class ChessPiece {
                 }
                 if ((row == 2 && direction == -1) || (row == 7 && direction == 1)){
                     promotion = true;
+                } else if ((row == 2 && direction == 1) || (row == 7 && direction == -1)) {
+                    pawnCheck(board, myPosition, row, col, direction*2, null);
                 }
-                ChessPiece.PieceType promo = null;
-                pawnCheck(board, myPosition, row, col, direction, promo);
+                if (promotion){
+                    for(PieceType p: PieceType.values()){
+                        if (p != PieceType.PAWN && p != PieceType.KING){
+                            pawnCheck(board, myPosition, row, col, direction, p);
+                        }
+                    }
+                }else{
+                    pawnCheck(board, myPosition, row, col, direction, null);
+                }
+
 
             }
                 break;
