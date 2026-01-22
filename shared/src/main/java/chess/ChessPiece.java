@@ -108,20 +108,20 @@ public class ChessPiece {
     private void rook(ChessBoard board, ChessPosition myPosition, int row, int col){
         boolean change = false;
         for (int i = -1; i < 2; i = i + 2) {
-            for (int j = -1; j < 2; j = j + 2) {
+            do {
                 boolean cont = true;
                 int sum_r = 0;
                 int sum_c = 0;
                 while (cont) {
-                    if (change){
+                    if (change) {
                         sum_r = sum_r + i;
-                    }else {
-                        sum_c = sum_c + j;
+                    } else {
+                        sum_c = sum_c + i;
                     }
                     cont = check(board, myPosition, row, col, sum_r, sum_c, null);
                 }
                 change = !change;
-            }
+            } while (change);
         }
     }
     private void bishop(ChessBoard board, ChessPosition myPosition, int row, int col){
@@ -140,9 +140,12 @@ public class ChessPiece {
     }
 
     private void pawnCheck(ChessBoard board, ChessPosition myPosition, int row, int col, int direction, ChessPiece.PieceType promo){
-        check(board, myPosition, row, col, direction, 0, promo);
+        if (board.getPiece(new ChessPosition(row+direction, col)) == null) {
+            check(board, myPosition, row, col, direction, 0, promo);
+        }
         for (int i = -1; i< 2; i = i + 2) {
-            if (onBoard(row+1, col+i) && onPiece(board, new ChessPosition(row+1, col+i))){
+            ChessPosition position = new ChessPosition(row+direction, col+i);
+            if (onBoard(row+direction, col+i) && onPiece(board, position) && board.getPiece(position) != null){
                 check(board, myPosition, row, col, direction, i, promo);
             }
         }
@@ -161,8 +164,10 @@ public class ChessPiece {
             case KING: {
                 for (int i = -1; i < 2; i++) {
                     for (int j = -1; j < 2; j++){
-                        if (i != 0 && j != 0 && onBoard(row + i, col + j) && onPiece(board, new ChessPosition(row + i, col + j))) {
-                            Moves.add(new ChessMove(myPosition, new ChessPosition(row + i, col + j), null));
+                        if (i != 0 || j != 0) {
+                            if (onBoard(row + i, col + j) && onPiece(board, new ChessPosition(row + i, col + j))) {
+                                Moves.add(new ChessMove(myPosition, new ChessPosition(row + i, col + j), null));
+                            }
                         }
                     }
                 }
@@ -183,8 +188,10 @@ public class ChessPiece {
                 break;
             case KNIGHT: {
                 for (int i = -1; i < 2; i = i + 2){
-                    check(board, myPosition, row, col, -3, i, null);
-                    check(board, myPosition, row, col, i, 3, null);
+                    check(board, myPosition, row, col, -2, i, null);
+                    check(board, myPosition, row, col, 2, i, null);
+                    check(board, myPosition, row, col, i, 2, null);
+                    check(board, myPosition, row, col, i, -2, null);
                 }
             }
                 break;
@@ -197,7 +204,10 @@ public class ChessPiece {
                 if ((row == 2 && direction == -1) || (row == 7 && direction == 1)){
                     promotion = true;
                 } else if ((row == 2 && direction == 1) || (row == 7 && direction == -1)) {
-                    pawnCheck(board, myPosition, row, col, direction*2, null);
+                    if ((board.getPiece(new ChessPosition(row + (direction*2), col)) == null) &&
+                            (board.getPiece(new ChessPosition(row + (direction), col)) == null)) {
+                        check(board, myPosition, row, col, direction * 2, 0, null);
+                    }
                 }
                 if (promotion){
                     for(PieceType p: PieceType.values()){
