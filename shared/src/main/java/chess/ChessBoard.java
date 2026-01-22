@@ -60,7 +60,53 @@ public class ChessBoard {
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
+    private void resetAddPiece(ChessGame.TeamColor c, ChessPiece.PieceType t, int x_pos, int y_pos){
+        Board[y_pos][x_pos] = new ChessPiece(c, t);
+    }
+
     public void resetBoard() {
         Board = new ChessPiece[8][8];
+        for (ChessPiece.PieceType p : ChessPiece.PieceType.values()){
+            switch (p){
+                case ChessPiece.PieceType.KING: {
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 4, 7);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 4, 0);
+                }
+                break;
+                case ChessPiece.PieceType.QUEEN: {
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 3, 7);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 3, 0);
+                }
+                break;
+                case ChessPiece.PieceType.ROOK: {
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 0, 7);
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 7, 7);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 0, 0);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 7, 0);
+                }
+                break;
+                case ChessPiece.PieceType.BISHOP: {
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 2, 7);
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 5, 7);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 2, 0);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 5, 0);
+                }
+                break;
+                case ChessPiece.PieceType.KNIGHT: {
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 1, 7);
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 6, 7);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 1, 0);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 6, 0);
+                }
+                break;
+                case ChessPiece.PieceType.PAWN: {
+                    for (int i = 0; i < 8; i++){
+                        resetAddPiece(ChessGame.TeamColor.BLACK, p, i, 6);
+                        resetAddPiece(ChessGame.TeamColor.WHITE, p, i, 1);
+                    }
+                }
+                break;
+            }
+        }
     }
 }
