@@ -64,10 +64,10 @@ public class ChessPiece {
         return Type;
     }
 
-    private boolean onBoard(int x_pos, int y_pos){
-        if (x_pos < 1 || y_pos < 1){
+    private boolean onBoard(int xPos, int yPos){
+        if (xPos < 1 || yPos < 1){
             return false;
-        } else if (x_pos > 8 || y_pos > 8) {
+        } else if (xPos > 8 || yPos > 8) {
             return false;
         }
         else{
@@ -75,32 +75,16 @@ public class ChessPiece {
         }
     }
 
-    private boolean onPiece(ChessBoard board, ChessPosition position){
-        ChessPiece p = board.getPiece(position);
-        if (p != null){
-            return Color != p.getTeamColor();
-        }
-        return true;
-    }
-    private boolean cont(ChessBoard board, ChessPosition position){
-        ChessPiece p = board.getPiece(position);
-        if (p != null){
-            return Color == p.getTeamColor();
-        }
-        return true;
-    }
-
-    private boolean check(ChessBoard board, ChessPosition myPosition, int row, int col, int offset_r, int offset_c, ChessPiece.PieceType promo){
-        if (onBoard(row + offset_r, col + offset_c)) {
-            if (onPiece(board, new ChessPosition(row + offset_r, col + offset_c))) {
-                Moves.add(new ChessMove(myPosition, new ChessPosition(row + offset_r, col + offset_c), promo));
-            } else {
-                return false;
+    private boolean check(ChessBoard board, ChessPosition myPosition, int row, int col, ChessPiece.PieceType promo){
+        if (onBoard(row, col)) {
+            ChessPosition square = new ChessPosition(row, col);
+            ChessPiece piece = board.getPiece(square);
+            if (piece == null) {
+                Moves.add(new ChessMove(myPosition, square, promo));
+                return true;
+            } else if (piece.getTeamColor() != Color) {
+                Moves.add(new ChessMove(myPosition, square, promo));
             }
-            if (!cont(board, new ChessPosition(row + offset_r, col + offset_c))) {
-                return false;
-            }
-            return true;
         }
         return false;
     }
@@ -118,7 +102,7 @@ public class ChessPiece {
                     } else {
                         sum_c = sum_c + i;
                     }
-                    cont = check(board, myPosition, row, col, sum_r, sum_c, null);
+                    cont = check(board, myPosition, row + sum_r, col + sum_c,  null);
                 }
                 change = !change;
             } while (change);
@@ -133,7 +117,7 @@ public class ChessPiece {
                 while (cont) {
                     sum_r = sum_r + i;
                     sum_c = sum_c + j;
-                    cont = check(board, myPosition, row, col, sum_r, sum_c, null);
+                    cont = check(board, myPosition, row + sum_r, col + sum_c, null);
                 }
             }
         }
@@ -141,12 +125,15 @@ public class ChessPiece {
 
     private void pawnCheck(ChessBoard board, ChessPosition myPosition, int row, int col, int direction, ChessPiece.PieceType promo){
         if (board.getPiece(new ChessPosition(row+direction, col)) == null) {
-            check(board, myPosition, row, col, direction, 0, promo);
+            check(board, myPosition, row + direction, col, promo);
         }
         for (int i = -1; i< 2; i = i + 2) {
-            ChessPosition position = new ChessPosition(row+direction, col+i);
-            if (onBoard(row+direction, col+i) && onPiece(board, position) && board.getPiece(position) != null){
-                check(board, myPosition, row, col, direction, i, promo);
+            ChessPosition square = new ChessPosition(row+direction, col+i);
+            if (onBoard(row + direction, col + i)) {
+                ChessPiece piece = board.getPiece(square);
+                if (piece != null) {
+                    check(board, myPosition, row + direction, col + i, promo);
+                }
             }
         }
     }
@@ -164,18 +151,14 @@ public class ChessPiece {
             case KING: {
                 for (int i = -1; i < 2; i++) {
                     for (int j = -1; j < 2; j++){
-                        if (i != 0 || j != 0) {
-                            if (onBoard(row + i, col + j) && onPiece(board, new ChessPosition(row + i, col + j))) {
-                                Moves.add(new ChessMove(myPosition, new ChessPosition(row + i, col + j), null));
-                            }
-                        }
+                        check(board, myPosition, row + i, col + j, null);
                     }
                 }
             }
                 break;
             case QUEEN: {
-                    rook(board, myPosition, row, col);
-                    bishop(board, myPosition, row, col);
+                rook(board, myPosition, row, col);
+                bishop(board, myPosition, row, col);
             }
                 break;
             case ROOK: {
@@ -188,10 +171,10 @@ public class ChessPiece {
                 break;
             case KNIGHT: {
                 for (int i = -1; i < 2; i = i + 2){
-                    check(board, myPosition, row, col, -2, i, null);
-                    check(board, myPosition, row, col, 2, i, null);
-                    check(board, myPosition, row, col, i, 2, null);
-                    check(board, myPosition, row, col, i, -2, null);
+                    for (int j = -2; j < 3; j = j + 4) {
+                        check(board, myPosition, row + j, col + i, null);
+                        check(board, myPosition, row  +i, col + j, null);
+                    }
                 }
             }
                 break;
@@ -203,15 +186,15 @@ public class ChessPiece {
                 }
                 if ((row == 2 && direction == -1) || (row == 7 && direction == 1)){
                     promotion = true;
-                } else if ((row == 2 && direction == 1) || (row == 7 && direction == -1)) {
-                    if ((board.getPiece(new ChessPosition(row + (direction*2), col)) == null) &&
-                            (board.getPiece(new ChessPosition(row + (direction), col)) == null)) {
-                        check(board, myPosition, row, col, direction * 2, 0, null);
+                } else if (row == 2 || row == 7) {
+                    if ((board.getPiece(new ChessPosition(row + direction * 2, col)) == null) &&
+                            (board.getPiece(new ChessPosition(row + direction, col)) == null)) {
+                        check(board, myPosition, row + direction * 2, col, null);
                     }
                 }
                 if (promotion){
                     for(PieceType p: PieceType.values()){
-                        if (p != PieceType.PAWN && p != PieceType.KING){
+                        if (p != PieceType.KING && p != PieceType.PAWN){
                             pawnCheck(board, myPosition, row, col, direction, p);
                         }
                     }
