@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class ChessMove {
 
-    private ChessPosition s_Pos;
-    private ChessPosition e_Pos;
+    private ChessPosition sPos;
+    private ChessPosition ePos;
     private ChessPiece.PieceType promotion;
 
     @Override
@@ -20,18 +20,18 @@ public class ChessMove {
             return false;
         }
         ChessMove chessMove = (ChessMove) o;
-        return Objects.equals(s_Pos, chessMove.s_Pos) && Objects.equals(e_Pos, chessMove.e_Pos) && promotion == chessMove.promotion;
+        return Objects.equals(sPos, chessMove.sPos) && Objects.equals(ePos, chessMove.ePos) && promotion == chessMove.promotion;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(s_Pos, e_Pos, promotion);
+        return Objects.hash(sPos, ePos, promotion);
     }
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
-        s_Pos = startPosition;
-        e_Pos = endPosition;
+        sPos = startPosition;
+        ePos = endPosition;
         promotion = promotionPiece;
     }
 
@@ -39,14 +39,14 @@ public class ChessMove {
      * @return ChessPosition of starting location
      */
     public ChessPosition getStartPosition() {
-        return s_Pos;
+        return sPos;
     }
 
     /**
      * @return ChessPosition of ending location
      */
     public ChessPosition getEndPosition() {
-        return e_Pos;
+        return ePos;
     }
 
     /**
