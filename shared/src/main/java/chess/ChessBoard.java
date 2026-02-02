@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    private ChessPiece[][] Board = new ChessPiece[8][8];
+    public ChessPiece[][] Board = new ChessPiece[8][8];
 
     @Override
     public boolean equals(Object o) {
