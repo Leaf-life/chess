@@ -28,7 +28,6 @@ public class ChessGame {
     }
 
     public ChessGame() {
-        //setBoard(board);
     }
 
     /**
@@ -89,15 +88,13 @@ public class ChessGame {
             return new ArrayList<ChessMove>();
         }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
-        if (piece.getPieceType() == ChessPiece.PieceType.KING){
-            Iterator<ChessMove> m = possibleMoves.iterator();
-            while (m.hasNext()) {
-                ChessBoard testBoard = pretendMove(m.next(), piece);
-                ChessGame checkGame = new ChessGame();
-                checkGame.setBoard(testBoard);
-                if (checkGame.isInCheck(piece.getTeamColor())) {
-                    m.remove();
-                }
+        Iterator<ChessMove> m = possibleMoves.iterator();
+        ChessGame checkGame = new ChessGame();
+        while (m.hasNext()) {
+            ChessBoard testBoard = pretendMove(m.next(), piece);
+            checkGame.setBoard(testBoard);
+            if (checkGame.isInCheck(piece.getTeamColor())) {
+                m.remove();
             }
         }
         return possibleMoves;
@@ -156,18 +153,17 @@ public class ChessGame {
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPos = findPiece(ChessPiece.PieceType.KING, teamColor).getFirst();
         for (ChessPiece.PieceType x: ChessPiece.PieceType.values()){
-            if (x != ChessPiece.PieceType.KING) {
-                chess.ChessGame.TeamColor checkColor = TeamColor.WHITE;
-                if (teamColor == TeamColor.WHITE) {
-                    checkColor = TeamColor.BLACK;
-                }
-                ArrayList<ChessPosition> checkMoves = findPiece(x, checkColor);
-                for (ChessPosition p : checkMoves) {
-                    Collection<ChessMove> moves = validMoves(p);
-                    for (ChessMove m : moves) {
-                        if (kingPos.equals(m.getEndPosition())) {
-                            return true;
-                        }
+            chess.ChessGame.TeamColor checkColor = TeamColor.WHITE;
+            if (teamColor == TeamColor.WHITE) {
+                checkColor = TeamColor.BLACK;
+            }
+            ArrayList<ChessPosition> checkMoves = findPiece(x, checkColor);
+            for (ChessPosition p : checkMoves) {
+                ChessPiece checkPiece = board.getPiece(p);
+                Collection<ChessMove> moves = checkPiece.pieceMoves(board, p);
+                for (ChessMove m : moves) {
+                    if (kingPos.equals(m.getEndPosition())) {
+                        return true;
                     }
                 }
             }
