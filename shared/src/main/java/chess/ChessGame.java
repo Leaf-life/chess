@@ -89,9 +89,10 @@ public class ChessGame {
         }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(board, startPosition);
         Iterator<ChessMove> m = possibleMoves.iterator();
-        ChessGame checkGame = new ChessGame();
         while (m.hasNext()) {
-            ChessBoard testBoard = pretendMove(m.next(), piece);
+            ChessMove move = m.next();
+            ChessBoard testBoard = pretendMove(move, piece);
+            ChessGame checkGame = new ChessGame();
             checkGame.setBoard(testBoard);
             if (checkGame.isInCheck(piece.getTeamColor())) {
                 m.remove();
@@ -152,11 +153,11 @@ public class ChessGame {
      */
     public boolean isInCheck(TeamColor teamColor) {
         ChessPosition kingPos = findPiece(ChessPiece.PieceType.KING, teamColor).getFirst();
+        chess.ChessGame.TeamColor checkColor = TeamColor.WHITE;
+        if (teamColor == TeamColor.WHITE) {
+            checkColor = TeamColor.BLACK;
+        }
         for (ChessPiece.PieceType x: ChessPiece.PieceType.values()){
-            chess.ChessGame.TeamColor checkColor = TeamColor.WHITE;
-            if (teamColor == TeamColor.WHITE) {
-                checkColor = TeamColor.BLACK;
-            }
             ArrayList<ChessPosition> checkMoves = findPiece(x, checkColor);
             for (ChessPosition p : checkMoves) {
                 ChessPiece checkPiece = board.getPiece(p);
@@ -189,10 +190,16 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        ChessPosition kingPos = findPiece(ChessPiece.PieceType.KING, teamColor).getFirst();
-        ChessPiece king = board.getPiece(kingPos);
-        Collection<ChessMove> possibleMoves = validMoves(kingPos);
-        return possibleMoves.isEmpty();
+        for (ChessPiece.PieceType x: ChessPiece.PieceType.values()) {
+            Collection<ChessPosition> positions = findPiece(x, teamColor);
+            for (ChessPosition piecePos: positions) {
+                Collection<ChessMove> possibleMoves = validMoves(piecePos);
+                if (!(possibleMoves.isEmpty())) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -211,5 +218,15 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    @Override
+    public String toString(){
+        ChessPiece[][] b = board.Board;
+        for (int i = 1; i <= 8; i++){
+            for (int j = 1; j <= 8; j++){
+
+            }
+        }
     }
 }
