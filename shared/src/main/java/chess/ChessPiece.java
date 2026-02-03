@@ -82,7 +82,7 @@ public class ChessPiece {
             if (piece == null) {
                 moves.add(new ChessMove(myPosition, square, promo));
                 return true;
-            } else if (piece.getTeamColor() != color) {
+            } else if ((piece.getTeamColor() != color)) {
                 moves.add(new ChessMove(myPosition, square, promo));
             }
         }
@@ -145,6 +145,7 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         switch(type){

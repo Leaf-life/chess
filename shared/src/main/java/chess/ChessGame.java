@@ -94,7 +94,8 @@ public class ChessGame {
             ChessBoard testBoard = pretendMove(move, piece);
             ChessGame checkGame = new ChessGame();
             checkGame.setBoard(testBoard);
-            if (checkGame.isInCheck(piece.getTeamColor())) {
+            boolean ifCheck = checkGame.isInCheck(piece.getTeamColor());
+            if (ifCheck) {
                 m.remove();
             }
         }
@@ -162,9 +163,11 @@ public class ChessGame {
             for (ChessPosition p : checkMoves) {
                 ChessPiece checkPiece = board.getPiece(p);
                 Collection<ChessMove> moves = checkPiece.pieceMoves(board, p);
-                for (ChessMove m : moves) {
-                    if (kingPos.equals(m.getEndPosition())) {
-                        return true;
+                if (checkPiece.getTeamColor() != teamColor) {
+                    for (ChessMove m : moves) {
+                        if (kingPos.equals(m.getEndPosition())) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -221,12 +224,38 @@ public class ChessGame {
     }
 
     @Override
-    public String toString(){
-        ChessPiece[][] b = board.Board;
+    public String toString() {
+        StringBuilder Display_board = new StringBuilder();
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
-
+                ChessPiece piece = board.Board[i-1][j-1];
+                if (piece != null) {
+                    Display_board.append("|");
+                    if (piece.getTeamColor() == TeamColor.WHITE) {
+                        switch (piece.getPieceType()) {
+                            case KING -> Display_board.append("|K");
+                            case QUEEN -> Display_board.append("|Q");
+                            case ROOK -> Display_board.append("|R");
+                            case BISHOP -> Display_board.append("|B");
+                            case KNIGHT -> Display_board.append("|N");
+                            case PAWN -> Display_board.append("|P");
+                        }
+                    }else{
+                        switch (piece.getPieceType()){
+                            case KING -> Display_board.append("|k");
+                            case QUEEN -> Display_board.append("|q");
+                            case ROOK -> Display_board.append("|r");
+                            case BISHOP -> Display_board.append("|b");
+                            case KNIGHT -> Display_board.append("|n");
+                            case PAWN -> Display_board.append("|p");
+                        }
+                    }
+                }else{
+                    Display_board.append("| ");
+                }
             }
+            Display_board.append("|\n");
         }
+        return Display_board.toString();
     }
 }
