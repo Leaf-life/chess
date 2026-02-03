@@ -55,10 +55,10 @@ public class ChessGame {
         BLACK
     }
 
-    public void Move(ChessBoard board, ChessMove move){
-        ChessPiece piece = board.getPiece(move.getStartPosition());
-        if (move.getPromotionPiece() != null){
-            piece = new ChessPiece(piece.getTeamColor(), move.getPromotionPiece());
+    public void Move(ChessBoard board, ChessPiece piece, ChessMove move){
+        ChessPiece.PieceType promo = move.getPromotionPiece();
+        if (promo != null && piece.getPieceType() == ChessPiece.PieceType.PAWN){
+            piece = new ChessPiece(piece.getTeamColor(), promo);
         }
         board.removePiece(move.getStartPosition());
         board.addPiece(move.getEndPosition(), piece);
@@ -72,7 +72,7 @@ public class ChessGame {
         ;
         ChessBoard testBoard = new ChessBoard();
         testBoard.setBoard(tBoard);
-        Move(testBoard, move);
+        Move(testBoard, piece, move);
         return testBoard;
     }
     /**
@@ -112,7 +112,6 @@ public class ChessGame {
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPosition = move.getStartPosition();
         ChessPosition endPosition = move.getEndPosition();
-        ChessPiece.PieceType promo = move.getPromotionPiece();
         ChessPiece piece = board.getPiece(startPosition);
         if (piece == null || piece.getTeamColor() != team){
             throw new InvalidMoveException();
@@ -120,7 +119,7 @@ public class ChessGame {
         Collection<ChessMove> vMoves = validMoves(startPosition);
         for (ChessMove m: vMoves){
             if (endPosition.equals(m.getEndPosition())){
-                Move(board, m);
+                Move(board, piece, move);
                 if (team == TeamColor.WHITE){
                     setTeamTurn(TeamColor.BLACK);
                 }else{
@@ -194,15 +193,10 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        /*
         ChessPosition kingPos = findPiece(ChessPiece.PieceType.KING, teamColor).getFirst();
         ChessPiece king = board.getPiece(kingPos);
-        Collection<ChessMove> possibleMoves = king.pieceMoves(board, kingPos);
-        for (ChessMove m: possibleMoves){
-
-        }
-         */
-        throw new UnsupportedOperationException();
+        Collection<ChessMove> possibleMoves = validMoves(kingPos);
+        return possibleMoves.isEmpty();
     }
 
     /**
