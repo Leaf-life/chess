@@ -68,6 +68,10 @@ public class ChessBoard {
         Board[y_pos][x_pos] = new ChessPiece(c, t);
     }
 
+    public void setBoard(ChessPiece[][] newBoard){
+        Board = newBoard;
+    }
+
     public void resetBoard() {
         Board = new ChessPiece[8][8];
         for (ChessPiece.PieceType p : ChessPiece.PieceType.values()){
