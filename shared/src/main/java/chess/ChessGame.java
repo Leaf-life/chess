@@ -28,6 +28,8 @@ public class ChessGame {
     }
 
     public ChessGame() {
+        board.resetBoard();
+        team = TeamColor.WHITE;
     }
 
     /**
@@ -59,8 +61,10 @@ public class ChessGame {
         if (promo != null && piece.getPieceType() == ChessPiece.PieceType.PAWN){
             piece = new ChessPiece(piece.getTeamColor(), promo);
         }
-        board.removePiece(move.getStartPosition());
-        board.addPiece(move.getEndPosition(), piece);
+        ChessPosition sPos = move.getStartPosition();
+        ChessPosition ePos = move.getEndPosition();
+        board.removePiece(sPos);
+        board.addPiece(ePos, piece);
     }
 
     public ChessBoard pretendMove(ChessMove move, ChessPiece piece) {
@@ -182,17 +186,10 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return isInCheck(teamColor) && isInStalemate(teamColor);
+        return isInCheck(teamColor) && isInStalemateHelper(teamColor);
     }
 
-    /**
-     * Determines if the given team is in stalemate, which here is defined as having
-     * no valid moves while not in check.
-     *
-     * @param teamColor which team to check for stalemate
-     * @return True if the specified team is in stalemate, otherwise false
-     */
-    public boolean isInStalemate(TeamColor teamColor) {
+    public boolean isInStalemateHelper(TeamColor teamColor){
         for (ChessPiece.PieceType x: ChessPiece.PieceType.values()) {
             Collection<ChessPosition> positions = findPiece(x, teamColor);
             for (ChessPosition piecePos: positions) {
@@ -203,6 +200,20 @@ public class ChessGame {
             }
         }
         return true;
+    }
+
+    /**
+     * Determines if the given team is in stalemate, which here is defined as having
+     * no valid moves while not in check.
+     *
+     * @param teamColor which team to check for stalemate
+     * @return True if the specified team is in stalemate, otherwise false
+     */
+    public boolean isInStalemate(TeamColor teamColor) {
+        if (isInCheck(teamColor)){
+            return false;
+        }
+        return isInStalemateHelper(teamColor);
     }
 
     /**
@@ -228,9 +239,8 @@ public class ChessGame {
         StringBuilder Display_board = new StringBuilder();
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
-                ChessPiece piece = board.Board[i-1][j-1];
+                ChessPiece piece = board.getPiece(new ChessPosition(i, j));
                 if (piece != null) {
-                    Display_board.append("|");
                     if (piece.getTeamColor() == TeamColor.WHITE) {
                         switch (piece.getPieceType()) {
                             case KING -> Display_board.append("|K");

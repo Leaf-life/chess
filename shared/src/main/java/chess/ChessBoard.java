@@ -40,8 +40,7 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         if (piece != null) {
-            ChessPiece Piece = new ChessPiece(piece.getTeamColor(), piece.getPieceType());
-            Board[position.getRow() - 1][position.getColumn() - 1] = Piece;
+            Board[position.getRow() - 1][position.getColumn() - 1] = piece;
         }
     }
 
@@ -77,8 +76,10 @@ public class ChessBoard {
         for (ChessPiece.PieceType p : ChessPiece.PieceType.values()){
             switch (p){
                 case ChessPiece.PieceType.KING: {
-                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 4, 7);
-                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 4, 0);
+                    //resetAddPiece(ChessGame.TeamColor.BLACK, p, 4, 7);
+                    //resetAddPiece(ChessGame.TeamColor.WHITE, p, 4, 0);
+                    addPiece(new ChessPosition(8, 5), new ChessPiece(ChessGame.TeamColor.BLACK, p));
+                    addPiece(new ChessPosition(1, 5), new ChessPiece(ChessGame.TeamColor.WHITE, p));
                 }
                 break;
                 case ChessPiece.PieceType.QUEEN: {
