@@ -61,10 +61,8 @@ public class ChessGame {
         if (promo != null && piece.getPieceType() == ChessPiece.PieceType.PAWN){
             piece = new ChessPiece(piece.getTeamColor(), promo);
         }
-        ChessPosition sPos = move.getStartPosition();
-        ChessPosition ePos = move.getEndPosition();
-        board.removePiece(sPos);
-        board.addPiece(ePos, piece);
+        board.removePiece(move.getStartPosition());
+        board.addPiece(move.getEndPosition(), piece);
     }
 
     public ChessBoard pretendMove(ChessMove move, ChessPiece piece) {
@@ -239,7 +237,7 @@ public class ChessGame {
         StringBuilder Display_board = new StringBuilder();
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
-                ChessPiece piece = board.getPiece(new ChessPosition(i, j));
+                ChessPiece piece = board.getPiece(new ChessPosition(9 - (i), j));
                 if (piece != null) {
                     if (piece.getTeamColor() == TeamColor.WHITE) {
                         switch (piece.getPieceType()) {
