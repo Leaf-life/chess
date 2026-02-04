@@ -231,39 +231,4 @@ public class ChessGame {
     public ChessBoard getBoard() {
         return board;
     }
-
-    @Override
-    public String toString() {
-        StringBuilder Display_board = new StringBuilder();
-        for (int i = 1; i <= 8; i++){
-            for (int j = 1; j <= 8; j++){
-                ChessPiece piece = board.getPiece(new ChessPosition(9 - (i), j));
-                if (piece != null) {
-                    if (piece.getTeamColor() == TeamColor.WHITE) {
-                        switch (piece.getPieceType()) {
-                            case KING -> Display_board.append("|K");
-                            case QUEEN -> Display_board.append("|Q");
-                            case ROOK -> Display_board.append("|R");
-                            case BISHOP -> Display_board.append("|B");
-                            case KNIGHT -> Display_board.append("|N");
-                            case PAWN -> Display_board.append("|P");
-                        }
-                    }else{
-                        switch (piece.getPieceType()){
-                            case KING -> Display_board.append("|k");
-                            case QUEEN -> Display_board.append("|q");
-                            case ROOK -> Display_board.append("|r");
-                            case BISHOP -> Display_board.append("|b");
-                            case KNIGHT -> Display_board.append("|n");
-                            case PAWN -> Display_board.append("|p");
-                        }
-                    }
-                }else{
-                    Display_board.append("| ");
-                }
-            }
-            Display_board.append("|\n");
-        }
-        return Display_board.toString();
-    }
 }

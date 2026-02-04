@@ -30,12 +30,12 @@ public class ChessPiece {
             return false;
         }
         ChessPiece that = (ChessPiece) o;
-        return color == that.color && type == that.type && Objects.equals(moves, that.moves);
+        return color == that.color && type == that.type;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(color, type, moves);
+        return Objects.hash(color, type);
     }
 
     /**
