@@ -165,11 +165,9 @@ public class ChessGame {
             for (ChessPosition p : checkMoves) {
                 ChessPiece checkPiece = board.getPiece(p);
                 Collection<ChessMove> moves = checkPiece.pieceMoves(board, p);
-                if (checkPiece.getTeamColor() != teamColor) {
-                    for (ChessMove m : moves) {
-                        if (kingPos.equals(m.getEndPosition())) {
-                            return true;
-                        }
+                for (ChessMove m : moves) {
+                    if (kingPos.equals(m.getEndPosition())) {
+                        return true;
                     }
                 }
             }

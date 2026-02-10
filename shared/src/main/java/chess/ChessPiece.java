@@ -17,7 +17,7 @@ public class ChessPiece {
 
     private ChessGame.TeamColor color;
     private ChessPiece.PieceType type;
-    private Collection<ChessMove> moves = new ArrayList<>();
+    public Collection<ChessMove> moves = new ArrayList<>();
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         color = pieceColor;
@@ -150,11 +150,12 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         switch(type){
             case KING: {
-                for (int i = -1; i < 2; i++) {
+                /*for (int i = -1; i < 2; i++) {
                     for (int j = -1; j < 2; j++){
                         check(board, myPosition, row + i, col + j, null);
                     }
-                }
+                }*/
+                new King().kingMoves(board, myPosition, row, col, moves, color);
             }
                 break;
             case QUEEN: {
