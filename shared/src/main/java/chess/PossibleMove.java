@@ -27,7 +27,7 @@ public class PossibleMove {
         return false;
     }
 
-    private boolean onBoard(int xPos, int yPos){
+    public boolean onBoard(int xPos, int yPos){
         if (xPos < 1 || yPos < 1){
             return false;
         } else if (xPos > 8 || yPos > 8) {

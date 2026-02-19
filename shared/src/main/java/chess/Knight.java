@@ -1,11 +1,13 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class Knight {
     public Knight(){}
 
-    public void knightMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, ChessGame.TeamColor color){
+    public Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor color){
+        Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
         for (int i = -1; i < 2; i = i + 2){
@@ -14,5 +16,6 @@ public class Knight {
                 new PossibleMove().check(board, myPosition, row  +i, col + j, null, moves, color);
             }
         }
+        return moves;
     }
 }
