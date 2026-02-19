@@ -150,34 +150,24 @@ public class ChessPiece {
         int col = myPosition.getColumn();
         switch(type){
             case KING: {
-                /*for (int i = -1; i < 2; i++) {
-                    for (int j = -1; j < 2; j++){
-                        check(board, myPosition, row + i, col + j, null);
-                    }
-                }*/
-                new King().kingMoves(board, myPosition, row, col, moves, color);
+                new King().kingMoves(board, myPosition, moves, color);
             }
                 break;
             case QUEEN: {
-                rook(board, myPosition, row, col);
-                bishop(board, myPosition, row, col);
+                new PossibleMove().orthoginal(board, myPosition, row, col, moves, color);
+                new PossibleMove().diagnol(board, myPosition, row, col, moves, color);
             }
                 break;
             case ROOK: {
-                rook(board, myPosition, row, col);
+                new PossibleMove().orthoginal(board, myPosition, row, col, moves, color);
             }
                 break;
             case BISHOP: {
-                bishop(board, myPosition, row, col);
+                new PossibleMove().diagnol(board, myPosition, row, col, moves, color);
             }
                 break;
             case KNIGHT: {
-                for (int i = -1; i < 2; i = i + 2){
-                    for (int j = -2; j < 3; j = j + 4) {
-                        check(board, myPosition, row + j, col + i, null);
-                        check(board, myPosition, row  +i, col + j, null);
-                    }
-                }
+                new Knight().knightMoves(board, myPosition, moves, color);
             }
                 break;
             case PAWN: {

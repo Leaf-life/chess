@@ -7,7 +7,9 @@ public class King {
 
     public King(){}
 
-    public void kingMoves(ChessBoard board, ChessPosition myPosition, int row, int col,Collection<ChessMove> moves, ChessGame.TeamColor color){
+    public void kingMoves(ChessBoard board, ChessPosition myPosition, Collection<ChessMove> moves, ChessGame.TeamColor color){
+        int row = myPosition.getRow();
+        int col = myPosition.getColumn();
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++){
                 new PossibleMove().check(board, myPosition, row+i, col+j, null, moves, color);
