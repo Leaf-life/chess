@@ -15,8 +15,8 @@ import java.util.Objects;
  */
 public class ChessPiece {
 
-    private ChessGame.TeamColor color;
-    private ChessPiece.PieceType type;
+    private final ChessGame.TeamColor color;
+    private final ChessPiece.PieceType type;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         color = pieceColor;
@@ -70,33 +70,13 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves = new ArrayList<>();
-        int row = myPosition.getRow();
-        int col = myPosition.getColumn();
-        switch(type){
-            case KING: {
-                return new King().kingMoves(board, myPosition, color);
-            }
-            case QUEEN: {
-                new PossibleMove().orthoginal(board, myPosition, row, col, moves, color);
-                new PossibleMove().diagnol(board, myPosition, row, col, moves, color);
-            }
-                break;
-            case ROOK: {
-                new PossibleMove().orthoginal(board, myPosition, row, col, moves, color);
-            }
-                break;
-            case BISHOP: {
-                new PossibleMove().diagnol(board, myPosition, row, col, moves, color);
-            }
-                break;
-            case KNIGHT: {
-                return new Knight().knightMoves(board, myPosition, color);
-            }
-            case PAWN: {
-                return new Pawn().pawnMoves(board, myPosition, color);
-            }
-        }
-        return moves;
+        return switch (type) {
+            case KING -> new King().kingMoves(board, myPosition, color);
+            case QUEEN -> new Queen().queenMoves(board, myPosition, color);
+            case ROOK -> new Rook().rookMoves(board, myPosition, color);
+            case BISHOP -> new Bishop().bishopMoves(board, myPosition, color);
+            case KNIGHT -> new Knight().knightMoves(board, myPosition, color);
+            case PAWN -> new Pawn().pawnMoves(board, myPosition, color);
+        };
     }
 }
