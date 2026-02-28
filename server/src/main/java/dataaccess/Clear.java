@@ -3,7 +3,7 @@ package dataaccess;
 public class Clear {
     Clear(){}
 
-    public void clear(){
+    public void cleardb(AccessAuth auth, AccessGame game, AccessUser user){
 
     }
 }

@@ -5,24 +5,31 @@ import model.GameData;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class AccessGame {
+public class AccessGame implements GameAccess {
     private final Collection<GameData> games = new ArrayList<>();
-    AccessGame(){}
 
-    public void createGame(String gameName){
-        games.add(new GameData(1, null, null, gameName, new ChessGame()));
+    public void createGame(GameData game) throws DataAccessException{
+        games.add(game);
     }
 
-    public GameData getGame(int gameID){
+    public GameData getGame(int gameID) throws DataAccessException{
         for(GameData x: games){
             if (x.gameID() == gameID){
                 return x;
             }
         }
-        return null;
+        throw new DataAccessException("Error: bad request");
     }
 
-    public Collection<GameData> listGame(){
+    public Collection<GameData> listGame() throws DataAccessException{
         return games;
+    }
+
+    public void addPlayer() throws DataAccessException{
+
+    }
+
+    public void clearGames() throws DataAccessException{
+        games.clear();
     }
 }

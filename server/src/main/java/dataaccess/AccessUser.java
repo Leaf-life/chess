@@ -3,22 +3,26 @@ package dataaccess;
 import model.UserData;
 import org.eclipse.jetty.server.Authentication;
 
+import java.nio.file.attribute.UserDefinedFileAttributeView;
 import java.util.ArrayList;
 
-public class AccessUser {
+public class AccessUser implements UserAccess {
     private final ArrayList<UserData> users = new ArrayList<>();
-    AccessUser(){}
 
-    public void createUser(String username, String password, String email){
-        users.add(new UserData(username, password, email));
+    public void createUser(UserData user){
+        users.add(user);
     }
 
-    public UserData getUser(String username){
+    public UserData getUser(String username) throws DataAccessException{
         for (UserData x: users){
             if (x.username().equals(username)){
                 return x;
             }
         }
-        return null;
+        throw new DataAccessException("Error: unauthorized");
+    }
+
+    public void clearUsers(){
+        users.clear();
     }
 }
