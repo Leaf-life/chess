@@ -25,11 +25,7 @@ public class AccessGame implements GameAccess {
         return games;
     }
 
-    public void addPlayer() throws DataAccessException{
-
-    }
-
-    public void clearGames() throws DataAccessException{
+    public void clearGames(){
         games.clear();
     }
 }

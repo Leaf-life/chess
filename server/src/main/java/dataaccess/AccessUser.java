@@ -25,4 +25,11 @@ public class AccessUser implements UserAccess {
     public void clearUsers(){
         users.clear();
     }
+
+    public String listUsers(){
+        if (users.isEmpty()){
+            return null;
+        }
+        return "has users";
+    }
 }

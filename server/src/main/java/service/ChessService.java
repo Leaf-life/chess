@@ -66,4 +66,31 @@ public class ChessService {
         checklogin(authtoken);
         return gameaccess.listGame();
     }
+
+    public void joinGame(String authToken, String playerColor, int gameID) throws DataAccessException{
+        checklogin(authToken);
+        AuthData auth = authaccess.getAuth(authToken);
+        GameData game = gameaccess.getGame(gameID);
+        if (game == null){
+            throw new DataAccessException("Error: bad game request");
+        }
+        if (playerColor.equals("white")){
+            if (game.whiteUsername() != null){
+                throw new DataAccessException("Error: color already taken");
+            }
+            GameData newGame = new GameData(123, auth.username(), null, game.gameName(), new ChessGame());
+            gameaccess.createGame(game);
+        }else{
+            if (game.blackUsername() != null){
+                throw new DataAccessException("Error: color already taken");
+            }
+            GameData newGame = new GameData(123, auth.username(), null, game.gameName(), new ChessGame());
+            gameaccess.createGame(game);
+        }
+    }
+    public void clear(){
+        gameaccess.clearGames();
+        useraccess.clearUsers();
+        authaccess.clearAuths();
+    }
 }

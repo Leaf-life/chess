@@ -18,11 +18,11 @@ public class Server {
     public Server() {
         this.service = new ChessService(new AccessUser(), new AccessGame(), new AccessAuth());
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
-            .post("/user/{user}", this::registration)
-            .post("/session/{session}", this::login)
-            .delete("/session/{session}", this::logout)
+            .post("/user", this::registration)
+            .post("/session", this::login)
+            .delete("/session", this::logout)
             .get("/game", this::listGames)
-            .post("/game/{game}", this::createGame)
+            .post("/game", this::createGame)
             .put("/game", this::joinGame)
             .delete("/db", this::clear);
         // Register your endpoints and exception handlers here.
@@ -35,9 +35,16 @@ public class Server {
         context.result(new Gson().toJson(auth));
     }
 
-    private void login(@NotNull Context context){}
+    private void login(@NotNull Context context) throws DataAccessException{
+        UserData reg = new Gson().fromJson(context.body(), UserData.class);
+        AuthData auth = service.login(reg.username(), reg.password());
+        context.result(new Gson().toJson(auth));
+    }
 
-    private void logout(@NotNull Context context){}
+    private void logout(@NotNull Context context) throws DataAccessException{
+        AuthData auth = new Gson().fromJson(context.body(), AuthData.class);
+        service.logout(auth.authToken());
+    }
 
     private void listGames(@NotNull Context context){}
 
@@ -45,7 +52,9 @@ public class Server {
 
     private void joinGame(@NotNull Context context){}
 
-    private void clear(@NotNull Context context){}
+    private void clear(@NotNull Context context){
+        service.clear();
+    }
 
     public int run(int desiredPort) {
         javalin.start(desiredPort);

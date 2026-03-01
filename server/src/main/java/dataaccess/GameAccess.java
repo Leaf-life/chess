@@ -12,7 +12,5 @@ public interface GameAccess {
 
     <GamaData> Collection<GamaData> listGame() throws DataAccessException;
 
-    void addPlayer() throws DataAccessException;
-
-    void clearGames() throws DataAccessException;
+    void clearGames();
 }

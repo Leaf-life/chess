@@ -73,4 +73,28 @@ public class ServiceTests {
         expectedGames.add(new GameData(123, "user", null, "bestGame3", new ChessGame()));
         Assertions.assertEquals(expectedGames, games);
     }
+
+    @Test
+    @Order(6)
+    @DisplayName("joinGame")
+    public void testJoinGame() throws DataAccessException{
+        UserData user1 = new UserData("user", "pass", "email");
+        AuthData auth1 = chessservice.registration(user1);
+        UserData user2 = new UserData("user2", "pass", "email");
+        AuthData auth2 = chessservice.registration(user2);
+        GameData game = chessservice.createGame(auth1.authToken(), "bestGame1");
+        chessservice.joinGame(auth2.authToken(), "black", game.gameID());
+        Collection<GameData> games = chessservice.listGame(auth2.authToken());
+        Assertions.assertEquals(2, games.toArray().length);
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("clear")
+    public void testClear() throws DataAccessException{
+        chessservice.clear();
+        Assertions.assertEquals(new ArrayList<>(), accessgame.listGame());
+        Assertions.assertNull(accessuser.listUsers());
+        Assertions.assertNull(accessauth.listAuths());
+    }
 }

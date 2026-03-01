@@ -28,4 +28,11 @@ public class AccessAuth implements AuthAccess {
     public void clearAuths(){
         auths.clear();
     }
+
+    public String listAuths(){
+        if (auths.isEmpty()){
+            return null;
+        }
+        return "has auths";
+    }
 }

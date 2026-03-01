@@ -11,4 +11,6 @@ public interface AuthAccess {
     void deleteAuth(String authToken);
 
     void clearAuths();
+
+    String listAuths();
 }
