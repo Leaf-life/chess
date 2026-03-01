@@ -68,9 +68,9 @@ public class ServiceTests {
         chessservice.createGame(auth.authToken(), "bestGame3");
         Collection<GameData> games = chessservice.listGame(auth.authToken());
         Collection<GameData> expectedGames = new ArrayList<>();
-        expectedGames.add(new GameData(1, "user", null, "bestGame1", new ChessGame()));
-        expectedGames.add(new GameData(2, "user", null, "bestGame2", new ChessGame()));
-        expectedGames.add(new GameData(3, "user", null, "bestGame3", new ChessGame()));
+        expectedGames.add(new GameData(1, null, null, "bestGame1", new ChessGame()));
+        expectedGames.add(new GameData(2, null, null, "bestGame2", new ChessGame()));
+        expectedGames.add(new GameData(3, null, null, "bestGame3", new ChessGame()));
         Assertions.assertEquals(expectedGames, games);
     }
 
@@ -83,9 +83,9 @@ public class ServiceTests {
         UserData user2 = new UserData("user2", "pass", "email");
         AuthData auth2 = chessservice.registration(user2);
         GameData game = chessservice.createGame(auth1.authToken(), "bestGame1");
-        chessservice.joinGame(auth2.authToken(), "black", game.gameID());
+        chessservice.joinGame(auth2.authToken(), "BLACK", game.gameID());
         Collection<GameData> games = chessservice.listGame(auth2.authToken());
-        Assertions.assertEquals(2, games.toArray().length);
+        Assertions.assertEquals(1, games.toArray().length);
     }
 
     @Test

@@ -21,6 +21,10 @@ public class AccessGame implements GameAccess {
         throw new DataAccessException("Error: bad request", 400);
     }
 
+    public void deleteGame(GameData game){
+        games.remove(game);
+    }
+
     public Collection<GameData> listGame() throws DataAccessException{
         return games;
     }

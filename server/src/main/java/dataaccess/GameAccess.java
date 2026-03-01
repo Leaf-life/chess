@@ -10,6 +10,8 @@ public interface GameAccess {
 
     GameData getGame(int gameID) throws DataAccessException;
 
+    void deleteGame(GameData game);
+
     <GamaData> Collection<GamaData> listGame() throws DataAccessException;
 
     void clearGames();

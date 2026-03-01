@@ -28,7 +28,10 @@ public class ChessService {
     }
 
     public AuthData registration(UserData user) throws DataAccessException {
-        UserData userCheck = useraccess.getUser(user.email());
+        if (user.username() == null || user.password() == null || user.email() == null){
+            throw new DataAccessException("bad request", 400);
+        }
+        UserData userCheck = useraccess.getUser(user.username());
         if (userCheck != null){
             throw new DataAccessException("user already registered", 403);
         }
@@ -40,12 +43,12 @@ public class ChessService {
     }
 
     public AuthData login(String username, String password) throws DataAccessException{
-        UserData user = useraccess.getUser(username);
-        if (user == null){
-            throw new DataAccessException("user name is incorrect", 400);
+        if (username == null || password == null){
+            throw new DataAccessException("bad request", 400);
         }
-        if (!(user.password().equals(password))){
-            throw new DataAccessException("password is incorrect", 401);
+        UserData user = useraccess.getUser(username);
+        if (user == null || !(user.password().equals(password))){
+            throw new DataAccessException("unauthorized", 401);
         }
         AuthData auth = new AuthData(Integer.toString(nextAuthToken), username);
         nextAuthToken++;
@@ -60,8 +63,11 @@ public class ChessService {
 
     public GameData createGame(String authToken, String gameName) throws DataAccessException{
         checklogin(authToken);
+        if (gameName == null){
+            throw new DataAccessException("Bad request", 400);
+        }
         AuthData auth = authaccess.getAuth(authToken);
-        GameData game = new GameData(nextGameID, auth.username(), null, gameName, new ChessGame());
+        GameData game = new GameData(nextGameID, null, null, gameName, new ChessGame());
         nextGameID++;
         gameaccess.createGame(game);
         return game;
@@ -76,23 +82,23 @@ public class ChessService {
         checklogin(authToken);
         AuthData auth = authaccess.getAuth(authToken);
         GameData game = gameaccess.getGame(gameID);
-        if (game == null || playerColor == null){
+        if (game == null || playerColor == null || !(playerColor.equals("WHITE") || playerColor.equals("BLACK"))){
             throw new DataAccessException("Error: bad game request", 400);
         }
-        if (playerColor.equals("white")){
+        if (playerColor.equals("BLACK")){
+            if (game.blackUsername() != null){
+                throw new DataAccessException("Error: color already taken", 403);
+            }
+            GameData newGame = new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), new ChessGame());
+            gameaccess.deleteGame(game);
+            gameaccess.createGame(newGame);
+        }else{
             if (game.whiteUsername() != null){
                 throw new DataAccessException("Error: color already taken", 403);
             }
-            GameData newGame = new GameData(nextGameID, auth.username(), null, game.gameName(), new ChessGame());
-            nextGameID++;
-            gameaccess.createGame(game);
-        }else{
-            if (game.blackUsername() != null){
-                throw new DataAccessException("Error: color already taken", 400);
-            }
-            GameData newGame = new GameData(nextGameID, auth.username(), null, game.gameName(), new ChessGame());
-            nextGameID++;
-            gameaccess.createGame(game);
+            GameData newGame = new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), new ChessGame());
+            gameaccess.deleteGame(game);
+            gameaccess.createGame(newGame);
         }
     }
     public void clear(){
