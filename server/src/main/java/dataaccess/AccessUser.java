@@ -19,7 +19,7 @@ public class AccessUser implements UserAccess {
                 return x;
             }
         }
-        throw new DataAccessException("Error: unauthorized");
+        return null;
     }
 
     public void clearUsers(){

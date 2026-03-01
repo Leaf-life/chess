@@ -31,7 +31,8 @@ public class Server {
 
     private void registration(@NotNull Context context) throws DataAccessException {
         UserData reg = new Gson().fromJson(context.body(), UserData.class);
-        service.registration(reg);
+        AuthData auth = service.registration(reg);
+        context.result(new Gson().toJson(auth));
     }
 
     private void login(@NotNull Context context){}
