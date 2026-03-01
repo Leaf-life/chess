@@ -1,11 +1,10 @@
-package passoff.server;
+package service;
 
 import chess.ChessGame;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import service.*;
 import model.*;
 import dataaccess.*;
 
