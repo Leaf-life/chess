@@ -68,9 +68,9 @@ public class ServiceTests {
         chessservice.createGame(auth.authToken(), "bestGame3");
         Collection<GameData> games = chessservice.listGame(auth.authToken());
         Collection<GameData> expectedGames = new ArrayList<>();
-        expectedGames.add(new GameData(123, "user", null, "bestGame1", new ChessGame()));
-        expectedGames.add(new GameData(123, "user", null, "bestGame2", new ChessGame()));
-        expectedGames.add(new GameData(123, "user", null, "bestGame3", new ChessGame()));
+        expectedGames.add(new GameData(1, "user", null, "bestGame1", new ChessGame()));
+        expectedGames.add(new GameData(2, "user", null, "bestGame2", new ChessGame()));
+        expectedGames.add(new GameData(3, "user", null, "bestGame3", new ChessGame()));
         Assertions.assertEquals(expectedGames, games);
     }
 

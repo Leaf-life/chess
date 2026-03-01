@@ -11,6 +11,8 @@ public class ChessService {
     private final UserAccess useraccess;
     private final GameAccess gameaccess;
     private final AuthAccess authaccess;
+    private int nextAuthToken = 1;
+    private int nextGameID = 1;
 
     public ChessService(UserAccess useraccess, GameAccess gameaccess, AuthAccess authaccess){
         this.useraccess = useraccess;
@@ -21,17 +23,18 @@ public class ChessService {
     private void checklogin(String authtoken) throws DataAccessException{
         AuthData auth = authaccess.getAuth(authtoken);
         if (auth == null){
-            throw new DataAccessException("Error: No Session Found");
+            throw new DataAccessException("Error: No Session Found", new BadRequest("Error: No Session Found"));
         }
     }
 
     public AuthData registration(UserData user) throws DataAccessException {
         UserData userCheck = useraccess.getUser(user.email());
         if (userCheck != null){
-            throw new DataAccessException("user already registered");
+            throw new DataAccessException("user already registered", new AlreadyTaken("user already registered"));
         }
         useraccess.createUser(user);
-        AuthData auth = new AuthData("123", user.username());
+        AuthData auth = new AuthData(Integer.toString(nextAuthToken), user.username());
+        nextAuthToken++;
         authaccess.createAuth(auth);
         return auth;
     }
@@ -39,12 +42,13 @@ public class ChessService {
     public AuthData login(String username, String password) throws DataAccessException{
         UserData user = useraccess.getUser(username);
         if (user == null){
-            throw new DataAccessException("user name is incorrect");
+            throw new DataAccessException("user name is incorrect", new BadRequest("user name is incorrect"));
         }
-        if (!user.password().equals(password)){
-            throw new DataAccessException("password is incorrect");
+        if (!(user.password().equals(password))){
+            throw new DataAccessException("password is incorrect", new UnAthorized("password is incorrect"));
         }
-        AuthData auth = new AuthData("123", username);
+        AuthData auth = new AuthData(Integer.toString(nextAuthToken), username);
+        nextAuthToken++;
         authaccess.createAuth(auth);
         return auth;
     }
@@ -57,7 +61,8 @@ public class ChessService {
     public GameData createGame(String authToken, String gameName) throws DataAccessException{
         checklogin(authToken);
         AuthData auth = authaccess.getAuth(authToken);
-        GameData game = new GameData(123, auth.username(), null, gameName, new ChessGame());
+        GameData game = new GameData(nextGameID, auth.username(), null, gameName, new ChessGame());
+        nextGameID++;
         gameaccess.createGame(game);
         return game;
     }
@@ -78,13 +83,15 @@ public class ChessService {
             if (game.whiteUsername() != null){
                 throw new DataAccessException("Error: color already taken");
             }
-            GameData newGame = new GameData(123, auth.username(), null, game.gameName(), new ChessGame());
+            GameData newGame = new GameData(nextGameID, auth.username(), null, game.gameName(), new ChessGame());
+            nextGameID++;
             gameaccess.createGame(game);
         }else{
             if (game.blackUsername() != null){
                 throw new DataAccessException("Error: color already taken");
             }
-            GameData newGame = new GameData(123, auth.username(), null, game.gameName(), new ChessGame());
+            GameData newGame = new GameData(nextGameID, auth.username(), null, game.gameName(), new ChessGame());
+            nextGameID++;
             gameaccess.createGame(game);
         }
     }
