@@ -18,7 +18,7 @@ public class AccessGame implements GameAccess {
                 return x;
             }
         }
-        throw new DataAccessException("Error: bad request");
+        throw new DataAccessException("Error: bad request", 400);
     }
 
     public Collection<GameData> listGame() throws DataAccessException{

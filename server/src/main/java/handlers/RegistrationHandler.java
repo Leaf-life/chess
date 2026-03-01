@@ -16,7 +16,7 @@ public class RegistrationHandler {
     public UserData registration(UserData user) throws DataAccessException {
         UserData userdata = users.getUser(user.username());
         if (userdata != null){
-            throw new DataAccessException(" \"message\": \"Error: already taken\" ");
+            throw new DataAccessException(" \"message\": \"Error: already taken\" ", 403);
         }
         users.createUser(userdata);
         auths.createAuth(new AuthData("123", user.username()));

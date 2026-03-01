@@ -43,7 +43,7 @@ public class Server {
     private void login(@NotNull Context context) throws DataAccessException{
         LoginRequest reg = new Gson().fromJson(context.body(), LoginRequest.class);
         AuthData auth = service.login(reg.username(), reg.password());
-        context.result(new Gson().toJson(auth));
+        context.json(auth);
     }
 
     private void logout(@NotNull Context context) throws DataAccessException{
@@ -54,26 +54,31 @@ public class Server {
     private void listGames(@NotNull Context context) throws DataAccessException{
         String authToken = context.header("Authorization");
         Collection<GameData> games = service.listGame(authToken);
-        context.result(new Gson().toJson(games.toString()));
+        context.json(Map.of("games", games));
     }
 
     private void createGame(@NotNull Context context) throws DataAccessException{
+        Gson gson = new Gson();
         String authToken = context.header("Authorization");
-        String gameName = new Gson().toJson(context.body(), CreateGameRequest.class);
-        GameData game = service.createGame(authToken, gameName);
-        context.result(new Gson().toJson(game.toString()));
+        CreateGameRequest gameName = gson.fromJson(context.body(), CreateGameRequest.class);
+        GameData game = service.createGame(authToken, gameName.gameName());
+        context.json(game);
     }
 
-    private void joinGame(@NotNull Context context){}
+    private void joinGame(@NotNull Context context) throws DataAccessException{
+        String authToken = context.header("Authorization");
+        JoinGameRquest joinrequest = new Gson().fromJson(context.body(), JoinGameRquest.class);
+        service.joinGame(authToken, joinrequest.playerColor(), joinrequest.gameID());
+    }
 
     private void clear(@NotNull Context context){
         service.clear();
     }
 
-    private void exceptionHandler(Exception e, Context context) throws Throwable {
-        if (e.getCause() != null) {
-            throw e.getCause();
-        }
+    private void exceptionHandler(DataAccessException e, Context context){
+        var body = new Gson().toJson(Map.of("message", String.format("Error: %s", e.getMessage()), "success", false));
+        context.status(e.getStatusCode());
+        context.json(body);
 
     }
 
