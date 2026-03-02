@@ -10,8 +10,8 @@ import java.util.Objects;
  */
 public class ChessPosition {
 
-    private int Row;
-    private int Col;
+    private int row;
+    private int col;
 
     @Override
     public boolean equals(Object o) {
@@ -19,17 +19,17 @@ public class ChessPosition {
             return false;
         }
         ChessPosition that = (ChessPosition) o;
-        return Row == that.Row && Col == that.Col;
+        return row == that.row && col == that.col;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(Row, Col);
+        return Objects.hash(row, col);
     }
 
     public ChessPosition(int row, int col) {
-        Row = row;
-        Col = col;
+        this.row = row;
+        this.col = col;
     }
 
     /**
@@ -37,7 +37,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return Row;
+        return row;
     }
 
     /**
@@ -45,6 +45,6 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return Col;
+        return col;
     }
 }

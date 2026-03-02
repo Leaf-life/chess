@@ -26,10 +26,7 @@ public class Server {
             .post("/game", this::createGame)
             .put("/game", this::joinGame)
             .delete("/db", this::clear)
-            .exception(DataAccessException.class, this::exceptionHandler)
-            .exception(BadRequest.class, (e, config) -> config.status(400))
-            .exception(UnAthorized.class, (e, config) -> config.status(401))
-            .exception(AlreadyTaken.class, (e, config) -> config.status(403));
+            .exception(DataAccessException.class, this::exceptionHandler);
         // Register your endpoints and exception handlers here.
 
     }

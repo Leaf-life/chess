@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public class ChessBoard {
 
-    public ChessPiece[][] Board = new ChessPiece[8][8];
+    public ChessPiece[][] board = new ChessPiece[8][8];
 
     @Override
     public boolean equals(Object o) {
@@ -20,12 +20,12 @@ public class ChessBoard {
             return false;
         }
         ChessBoard that = (ChessBoard) o;
-        return Objects.deepEquals(Board, that.Board);
+        return Objects.deepEquals(board, that.board);
     }
 
     @Override
     public int hashCode() {
-        return Arrays.deepHashCode(Board);
+        return Arrays.deepHashCode(board);
     }
 
     public ChessBoard() {
@@ -40,12 +40,12 @@ public class ChessBoard {
      */
     public void addPiece(ChessPosition position, ChessPiece piece) {
         if (piece != null) {
-            Board[position.getRow() - 1][position.getColumn() - 1] = piece;
+            board[position.getRow() - 1][position.getColumn() - 1] = piece;
         }
     }
 
     public void removePiece(ChessPosition position) {
-        Board[position.getRow() - 1][position.getColumn() - 1] = null;
+        board[position.getRow() - 1][position.getColumn() - 1] = null;
     }
 
     /**
@@ -56,23 +56,23 @@ public class ChessBoard {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
-        return Board[position.getRow() - 1][position.getColumn() - 1];
+        return board[position.getRow() - 1][position.getColumn() - 1];
     }
 
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)
      */
-    private void resetAddPiece(ChessGame.TeamColor c, ChessPiece.PieceType t, int x_pos, int y_pos){
-        Board[y_pos][x_pos] = new ChessPiece(c, t);
+    private void resetAddPiece(ChessGame.TeamColor c, ChessPiece.PieceType t, int xPos, int yPos){
+        board[yPos][xPos] = new ChessPiece(c, t);
     }
 
     public void setBoard(ChessPiece[][] newBoard){
-        Board = newBoard;
+        board = newBoard;
     }
 
     public void resetBoard() {
-        Board = new ChessPiece[8][8];
+        board = new ChessPiece[8][8];
         for (ChessPiece.PieceType p : ChessPiece.PieceType.values()){
             switch (p){
                 case ChessPiece.PieceType.KING: {
@@ -118,39 +118,40 @@ public class ChessBoard {
             }
         }
     }
-
+/*
     @Override
     public String toString() {
-        StringBuilder Display_board = new StringBuilder("\n");
+        StringBuilder displayBoard = new StringBuilder("\n");
         for (int i = 1; i <= 8; i++){
             for (int j = 1; j <= 8; j++){
                 ChessPiece piece = getPiece(new ChessPosition(9 - (i), j));
                 if (piece != null) {
                     if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
                         switch (piece.getPieceType()) {
-                            case KING -> Display_board.append("|K");
-                            case QUEEN -> Display_board.append("|Q");
-                            case ROOK -> Display_board.append("|R");
-                            case BISHOP -> Display_board.append("|B");
-                            case KNIGHT -> Display_board.append("|N");
-                            case PAWN -> Display_board.append("|P");
+                            case KING -> displayBoard.append("|K");
+                            case QUEEN -> displayBoard.append("|Q");
+                            case ROOK -> displayBoard.append("|R");
+                            case BISHOP -> displayBoard.append("|B");
+                            case KNIGHT -> displayBoard.append("|N");
+                            case PAWN -> displayBoard.append("|P");
                         }
                     }else{
                         switch (piece.getPieceType()){
-                            case KING -> Display_board.append("|k");
-                            case QUEEN -> Display_board.append("|q");
-                            case ROOK -> Display_board.append("|r");
-                            case BISHOP -> Display_board.append("|b");
-                            case KNIGHT -> Display_board.append("|n");
-                            case PAWN -> Display_board.append("|p");
+                            case KING -> displayBoard.append("|k");
+                            case QUEEN -> displayBoard.append("|q");
+                            case ROOK -> displayBoard.append("|r");
+                            case BISHOP -> displayBoard.append("|b");
+                            case KNIGHT -> displayBoard.append("|n");
+                            case PAWN -> displayBoard.append("|p");
                         }
                     }
                 }else{
-                    Display_board.append("| ");
+                    displayBoard.append("| ");
                 }
             }
-            Display_board.append("|\n");
+            displayBoard.append("|\n");
         }
-        return Display_board.toString();
+        return displayBoard.toString();
     }
+ */
 }

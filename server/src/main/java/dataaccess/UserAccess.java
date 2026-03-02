@@ -6,7 +6,7 @@ public interface UserAccess {
 
     void createUser(UserData user);
 
-    UserData getUser(String Username) throws DataAccessException;
+    UserData getUser(String username) throws DataAccessException;
 
     void clearUsers();
 

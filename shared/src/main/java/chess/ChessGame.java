@@ -56,7 +56,7 @@ public class ChessGame {
         BLACK
     }
 
-    public void Move(ChessBoard board, ChessPiece piece, ChessMove move){
+    public void move(ChessBoard board, ChessPiece piece, ChessMove move){
         ChessPiece.PieceType promo = move.getPromotionPiece();
         if (promo != null && piece.getPieceType() == ChessPiece.PieceType.PAWN){
             piece = new ChessPiece(piece.getTeamColor(), promo);
@@ -66,14 +66,14 @@ public class ChessGame {
     }
 
     public ChessBoard pretendMove(ChessMove move, ChessPiece piece) {
-        ChessPiece[][] tBoard = new ChessPiece[board.Board.length][];
-        for (int i = 0; i < board.Board.length; i++) {
-            tBoard[i] = Arrays.copyOf(board.Board[i], board.Board.length);
+        ChessPiece[][] tBoard = new ChessPiece[board.board.length][];
+        for (int i = 0; i < board.board.length; i++) {
+            tBoard[i] = Arrays.copyOf(board.board[i], board.board.length);
         }
         ;
         ChessBoard testBoard = new ChessBoard();
         testBoard.setBoard(tBoard);
-        Move(testBoard, piece, move);
+        move(testBoard, piece, move);
         return testBoard;
     }
     /**
@@ -120,7 +120,7 @@ public class ChessGame {
         Collection<ChessMove> vMoves = validMoves(startPosition);
         for (ChessMove m: vMoves){
             if (endPosition.equals(m.getEndPosition())){
-                Move(board, piece, move);
+                move(board, piece, move);
                 if (team == TeamColor.WHITE){
                     setTeamTurn(TeamColor.BLACK);
                 }else{

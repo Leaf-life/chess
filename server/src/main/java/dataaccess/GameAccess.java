@@ -12,7 +12,7 @@ public interface GameAccess {
 
     void deleteGame(GameData game);
 
-    <GamaData> Collection<GamaData> listGame() throws DataAccessException;
+    <T> Collection<T> listGame() throws DataAccessException;
 
     void clearGames();
 }

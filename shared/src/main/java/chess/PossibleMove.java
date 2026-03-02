@@ -42,12 +42,12 @@ public class PossibleMove {
         for (int i = -1; i < 2; i = i + 2) {
             for (int j = -1; j < 2; j = j + 2) {
                 boolean cont = true;
-                int sum_r = 0;
-                int sum_c = 0;
+                int sumR = 0;
+                int sumC = 0;
                 while (cont) {
-                    sum_r = sum_r + i;
-                    sum_c = sum_c + j;
-                    cont = check(board, myPosition, row + sum_r, col + sum_c, null, moves, color);
+                    sumR = sumR + i;
+                    sumC = sumC + j;
+                    cont = check(board, myPosition, row + sumR, col + sumC, null, moves, color);
                 }
             }
         }
@@ -58,15 +58,15 @@ public class PossibleMove {
         for (int i = -1; i < 2; i = i + 2) {
             do {
                 boolean cont = true;
-                int sum_r = 0;
-                int sum_c = 0;
+                int sumR = 0;
+                int sumC = 0;
                 while (cont) {
                     if (change) {
-                        sum_r = sum_r + i;
+                        sumR = sumR + i;
                     } else {
-                        sum_c = sum_c + i;
+                        sumC = sumC + i;
                     }
-                    cont = check(board, myPosition, row + sum_r, col + sum_c,  null, moves, color);
+                    cont = check(board, myPosition, row + sumR, col + sumC,  null, moves, color);
                 }
                 change = !change;
             } while (change);
