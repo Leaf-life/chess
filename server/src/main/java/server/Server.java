@@ -40,7 +40,9 @@ public class Server {
     private void login(@NotNull Context context) throws DataAccessException{
         LoginRequest reg = new Gson().fromJson(context.body(), LoginRequest.class);
         AuthData auth = service.login(reg.username(), reg.password());
-        context.json(auth);
+        var serializer = new Gson();
+        var json = serializer.toJson(auth);
+        context.result(json);
     }
 
     private void logout(@NotNull Context context) throws DataAccessException{
@@ -51,7 +53,9 @@ public class Server {
     private void listGames(@NotNull Context context) throws DataAccessException{
         String authToken = context.header("Authorization");
         Collection<GameData> games = service.listGame(authToken);
-        context.json(Map.of("games", games));
+        var serializer = new Gson();
+        var json = serializer.toJson(Map.of("games", games));
+        context.result(json);
     }
 
     private void createGame(@NotNull Context context) throws DataAccessException{
@@ -59,7 +63,9 @@ public class Server {
         String authToken = context.header("Authorization");
         CreateGameRequest gameName = gson.fromJson(context.body(), CreateGameRequest.class);
         GameData game = service.createGame(authToken, gameName.gameName());
-        context.json(game);
+        var serializer = new Gson();
+        var json = serializer.toJson(game);
+        context.json(json);
     }
 
     private void joinGame(@NotNull Context context) throws DataAccessException{
