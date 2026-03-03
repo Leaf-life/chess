@@ -9,11 +9,15 @@ import java.util.Objects;
 
 public class PossibleMove {
 
-    public PossibleMove(){
+    ChessBoard board;
+    ChessGame.TeamColor color;
 
+    public PossibleMove(ChessBoard board, ChessGame.TeamColor color){
+        this.board = board;
+        this.color = color;
     }
 
-    public boolean check(ChessBoard board, ChessPosition myPosition, int row, int col, ChessPiece.PieceType promo, Collection<ChessMove> moves, ChessGame.TeamColor color){
+    public boolean check(ChessPosition myPosition, int row, int col, ChessPiece.PieceType promo, Collection<ChessMove> moves){
         if (onBoard(row, col)) {
             ChessPosition square = new ChessPosition(row, col);
             ChessPiece piece = board.getPiece(square);
@@ -38,7 +42,7 @@ public class PossibleMove {
         }
     }
 
-    public void diagnol(ChessBoard board, ChessPosition myPosition, int row, int col, Collection<ChessMove> moves, ChessGame.TeamColor color){
+    public void diagnol(ChessPosition myPosition, int row, int col, Collection<ChessMove> moves){
         for (int i = -1; i < 2; i = i + 2) {
             for (int j = -1; j < 2; j = j + 2) {
                 boolean cont = true;
@@ -47,13 +51,13 @@ public class PossibleMove {
                 while (cont) {
                     sumR = sumR + i;
                     sumC = sumC + j;
-                    cont = check(board, myPosition, row + sumR, col + sumC, null, moves, color);
+                    cont = check(myPosition, row + sumR, col + sumC, null, moves);
                 }
             }
         }
     }
 
-    public void orthoginal(ChessBoard board, ChessPosition myPosition, int row, int col, Collection<ChessMove> moves, ChessGame.TeamColor color){
+    public void orthoginal(ChessPosition myPosition, int row, int col, Collection<ChessMove> moves){
         boolean change = false;
         for (int i = -1; i < 2; i = i + 2) {
             do {
@@ -66,7 +70,7 @@ public class PossibleMove {
                     } else {
                         sumC = sumC + i;
                     }
-                    cont = check(board, myPosition, row + sumR, col + sumC,  null, moves, color);
+                    cont = check(myPosition, row + sumR, col + sumC,  null, moves);
                 }
                 change = !change;
             } while (change);

@@ -11,7 +11,7 @@ public class Rook {
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        new PossibleMove().orthoginal(board, myPosition, row, col, moves, color);
+        new PossibleMove(board, color).orthoginal(myPosition, row, col, moves);
         return moves;
     }
 }

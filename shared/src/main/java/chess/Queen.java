@@ -10,8 +10,8 @@ public class Queen {
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
-        new PossibleMove().orthoginal(board, myPosition, row, col, moves, color);
-        new PossibleMove().diagnol(board, myPosition, row, col, moves, color);
+        new PossibleMove(board, color).orthoginal(myPosition, row, col, moves);
+        new PossibleMove(board, color).diagnol(myPosition, row, col, moves);
         return moves;
     }
 }

@@ -76,7 +76,7 @@ public class ChessPiece {
             case ROOK -> new Rook().rookMoves(board, myPosition, color);
             case BISHOP -> new Bishop().bishopMoves(board, myPosition, color);
             case KNIGHT -> new Knight().knightMoves(board, myPosition, color);
-            case PAWN -> new Pawn().pawnMoves(board, myPosition, color);
+            case PAWN -> new Pawn(board, color).pawnMoves(myPosition);
         };
     }
 }

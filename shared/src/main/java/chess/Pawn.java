@@ -4,26 +4,33 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class Pawn {
-    PossibleMove pm = new PossibleMove();
 
-    public Pawn(){}
+    ChessBoard board;
+    ChessGame.TeamColor color;
 
-    private void pawnCheck(ChessBoard board, ChessPosition myPosition, int row, int col, int direction, ChessPiece.PieceType promo, Collection<ChessMove> moves, ChessGame.TeamColor color){
+    public Pawn(ChessBoard board, ChessGame.TeamColor color){
+        this.board = board;
+        this.color = color;
+    }
+
+    private void pawnCheck(ChessPosition myPosition, int row, int col, int direction, ChessPiece.PieceType promo, Collection<ChessMove> moves){
+        PossibleMove pm = new PossibleMove(board, color);
         if (board.getPiece(new ChessPosition(row+direction, col)) == null) {
-            pm.check(board, myPosition, row + direction, col, promo, moves, color);
+            pm.check(myPosition, row + direction, col, promo, moves);
         }
         for (int i = -1; i< 2; i = i + 2) {
             ChessPosition square = new ChessPosition(row+direction, col+i);
             if (pm.onBoard(row + direction, col + i)) {
                 ChessPiece piece = board.getPiece(square);
                 if (piece != null) {
-                    pm.check(board, myPosition, row + direction, col + i, promo, moves, color);
+                    pm.check(myPosition, row + direction, col + i, promo, moves);
                 }
             }
         }
     }
 
-    public Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition, ChessGame.TeamColor color){
+    public Collection<ChessMove> pawnMoves(ChessPosition myPosition){
+        PossibleMove pm = new PossibleMove(board, color);
         Collection<ChessMove> moves = new ArrayList<>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
@@ -37,17 +44,17 @@ public class Pawn {
         } else if (row == 2 || row == 7) {
             if ((board.getPiece(new ChessPosition(row + direction * 2, col)) == null) &&
                     (board.getPiece(new ChessPosition(row + direction, col)) == null)) {
-                pm.check(board, myPosition, row + direction * 2, col, null, moves, color);
+                pm.check(myPosition, row + direction * 2, col, null, moves);
             }
         }
         if (promotion){
             for(ChessPiece.PieceType p: ChessPiece.PieceType.values()){
                 if (p != ChessPiece.PieceType.KING && p != ChessPiece.PieceType.PAWN){
-                    pawnCheck(board, myPosition, row, col, direction, p, moves, color);
+                    pawnCheck(myPosition, row, col, direction, p, moves);
                 }
             }
         }else{
-            pawnCheck(board, myPosition, row, col, direction, null, moves, color);
+            pawnCheck(myPosition, row, col, direction, null, moves);
         }
         return moves;
     }

@@ -12,8 +12,8 @@ public class Knight {
         int col = myPosition.getColumn();
         for (int i = -1; i < 2; i = i + 2){
             for (int j = -2; j < 3; j = j + 4) {
-                new PossibleMove().check(board, myPosition, row + j, col + i, null, moves, color);
-                new PossibleMove().check(board, myPosition, row  +i, col + j, null, moves, color);
+                new PossibleMove(board, color).check(myPosition, row + j, col + i, null, moves);
+                new PossibleMove(board, color).check(myPosition, row  +i, col + j, null, moves);
             }
         }
         return moves;
