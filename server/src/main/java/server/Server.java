@@ -16,8 +16,12 @@ public class Server {
     private final ChessService service;
     private final Javalin javalin;
 
-    public Server() {
-        this.service = new ChessService(new AccessUser(), new AccessGame(), new AccessAuth());
+    public Server(){
+        this(new ChessService(new AccessUser(), new AccessGame(), new AccessAuth()));
+    }
+
+    public Server(ChessService service) {
+        this.service = service;
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
             .post("/user", this::registration)
             .post("/session", this::login)

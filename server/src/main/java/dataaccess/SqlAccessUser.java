@@ -11,20 +11,20 @@ public class SqlAccessUser implements UserAccess {
         configureDatabase();
     }
 
-    void createUser(UserData user){
+    public void createUser(UserData user){
 
     }
 
-    UserData getUser(String username) throws DataAccessException{
+    public UserData getUser(String username) throws DataAccessException{
+        return null;
+    }
+
+    public void clearUsers(){
 
     }
 
-    void clearUsers(){
-
-    }
-
-    String listUsers(){
-
+    public String listUsers(){
+        return null;
     }
 
     private final String[] createStatements = {
