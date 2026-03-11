@@ -1,9 +1,10 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import model.*;
 
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Collection;
 
 public class SqlAccessGame implements GameAccess {
@@ -12,29 +13,42 @@ public class SqlAccessGame implements GameAccess {
         configureDatabase();
     }
 
-    void createGame(GameData game) throws DataAccessException{
+    public void createGame(GameData game) throws DataAccessException{
+        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO game (gameID, whiteUsername, blackUsername, gameName, game) VALUES(?, ?)")) {
+                preparedStatement.setInt(1, game.gameID());
+                preparedStatement.setString(2, game.whiteUsername());
+                preparedStatement.setString(3, game.blackUsername());
+                preparedStatement.setString(4, game.gameName());
+                preparedStatement.setString(5, new Gson().toJson(game.game()));
+
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public GameData getGame(int gameID) throws DataAccessException{
+        return null;
+    }
+
+    public void deleteGame(GameData game){
 
     }
 
-    GameData getGame(int gameID) throws DataAccessException{
+    public Collection<ChessGame> listGame() throws DataAccessException{
+        return null;
+    }
+
+    public void clearGames(){
 
     }
 
-    void deleteGame(GameData game){
-
-    }
-
-    <T> Collection<T> listGame() throws DataAccessException{
-
-    }
-
-    void clearGames(){
-
-    }
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  pet (
+            CREATE TABLE IF NOT EXISTS  game (
               `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
