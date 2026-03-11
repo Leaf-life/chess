@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import model.*;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class SqlAccessGame implements GameAccess {
@@ -30,25 +31,69 @@ public class SqlAccessGame implements GameAccess {
     }
 
     public GameData getGame(int gameID) throws DataAccessException{
-        return null;
+        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?")) {
+                preparedStatement.setString(1, Integer.toString(gameID));
+                try (var rs = preparedStatement.executeQuery()) {
+                    return readgame(rs);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void deleteGame(GameData game){
+        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+            try (var preparedStatement = conn.prepareStatement("DELETE FROM game WHERE gameID=?")) {
+                preparedStatement.setString(1, Integer.toString(game.gameID()));
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
+    private GameData readgame(ResultSet rs) throws SQLException {
+        int ID = rs.getInt("gameID");
+        String white = rs.getString("whiteUsername");
+        String black = rs.getString("blackUsername");
+        String gameName = rs.getString("gameName");
+        ChessGame game = (ChessGame) rs.getObject("game");
+        return new GameData(ID, white, black, gameName, game);
     }
 
     public Collection<ChessGame> listGame() throws DataAccessException{
-        return null;
+        Collection<ChessGame> result = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT gameID FROM game";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        result.add(readgame(rs).game());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()), 500);
+        }
+        return result;
     }
 
     public void clearGames(){
-
+        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE game")) {
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS  game (
+            CREATE TABLE IF NOT EXISTS game (
               `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
