@@ -12,6 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DOATests {
@@ -57,7 +58,8 @@ public class DOATests {
     @DisplayName("Get Auth Negative")
     public void negGetAuthTest() throws DataAccessException{
         AuthAccess accessauth = new SqlAccessAuth();
-        //assertThrows(DataAccessException.class, () -> {accessauth.getAuth("123");});
+        AuthData auth = accessauth.getAuth("123");
+        assertNull(auth);
     }
 
     @Test
@@ -85,8 +87,33 @@ public class DOATests {
     @DisplayName("Create Game Neg")
     public void negCreateGameTest() throws DataAccessException{
         GameAccess accessGame= new SqlAccessGame();
-        int iD = accessGame.createGame(new GameData(123, null, null, "game", new ChessGame()));
-        //assertThrows(RuntimeException.class, () -> {accessGame.createGame(new GameData(ID, null, null, "game", new ChessGame()));});
+        GameData game = new GameData(123, null, null, "game", new ChessGame());
+        int iD = accessGame.createGame(game);
+        //assertThrows(DataAccessException.class, () -> {accessGame.createGame(new GameData(iD, null, null, "game", game.game()));});
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("Update Game Positive")
+    public void posUpdateGameTest() throws DataAccessException{
+        GameAccess accessGame= new SqlAccessGame();
+        GameData expectedGame = new GameData(123, null, null, "game", new ChessGame());
+        int iD = accessGame.createGame(expectedGame);
+        accessGame.updateGame(new GameData(iD, "white", null, "game", expectedGame.game()));
+        GameData game = accessGame.getGame(iD);
+        Assertions.assertEquals(expectedGame.game(), game.game());
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("Update Game Negative")
+    public void negUpdateGameTest() throws DataAccessException{
+        GameAccess accessGame= new SqlAccessGame();
+        GameData expectedGame = new GameData(123, null, null, "game", new ChessGame());
+        int iD = accessGame.createGame(expectedGame);
+        accessGame.updateGame(new GameData(iD, "white", null, "game", expectedGame.game()));
+        GameData game = accessGame.getGame(123);
+        assertNull(game);
     }
 
     @Test
