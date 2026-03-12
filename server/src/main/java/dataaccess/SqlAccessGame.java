@@ -14,7 +14,7 @@ public class SqlAccessGame implements GameAccess {
         try {
             configureDatabase();
         } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -111,13 +111,13 @@ public class SqlAccessGame implements GameAccess {
         return result;
     }
 
-    public void clearGames(){
+    public void clearGames() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE game")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("", e);
         }
     }
 

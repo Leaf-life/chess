@@ -78,7 +78,7 @@ public class Server {
         service.joinGame(authToken, joinrequest.playerColor(), joinrequest.gameID());
     }
 
-    private void clear(@NotNull Context context){
+    private void clear(@NotNull Context context) throws DataAccessException{
         service.clear();
         context.status(200);
     }

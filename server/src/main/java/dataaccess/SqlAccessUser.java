@@ -46,14 +46,14 @@ public class SqlAccessUser implements UserAccess {
         return null;
     }
 
-    public void clearUsers(){
+    public void clearUsers() throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
             try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE user")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage(), 401);
         }
     }
 

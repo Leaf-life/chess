@@ -16,5 +16,5 @@ public interface GameAccess {
 
     <T> Collection<T> listGame() throws DataAccessException;
 
-    void clearGames();
+    void clearGames() throws DataAccessException;
 }

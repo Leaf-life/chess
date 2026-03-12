@@ -33,7 +33,7 @@ public class SqlAccessAuth implements AuthAccess{
         }
     }
 
-    public AuthData getAuth(String authToken){
+    public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM auth WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
@@ -48,7 +48,7 @@ public class SqlAccessAuth implements AuthAccess{
                 }
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("", e);
         }
     }
 
@@ -64,14 +64,14 @@ public class SqlAccessAuth implements AuthAccess{
         }
     }
 
-    public void clearAuths(){
+    public void clearAuths() throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
             try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE auth")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage(), 401);
         }
     }
 

@@ -102,7 +102,7 @@ public class ChessService {
             gameaccess.updateGame(newGame);
         }
     }
-    public void clear(){
+    public void clear() throws DataAccessException{
         gameaccess.clearGames();
         useraccess.clearUsers();
         authaccess.clearAuths();

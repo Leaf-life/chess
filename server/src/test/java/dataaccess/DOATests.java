@@ -57,7 +57,7 @@ public class DOATests {
     @DisplayName("Get Auth Negative")
     public void negGetAuthTest() throws DataAccessException{
         AuthAccess accessauth = new SqlAccessAuth();
-        assertThrows(RuntimeException.class, () -> {accessauth.getAuth("123");});
+        assertThrows(DataAccessException.class, () -> {accessauth.getAuth("123");});
     }
 
     @Test
@@ -105,19 +105,19 @@ public class DOATests {
     @DisplayName("List Game Positive")
     public void posListGameTest() throws DataAccessException{
         GameAccess accessGame= new SqlAccessGame();
-        GameData game1 = new GameData(123, null, null, "game", new ChessGame());
-        GameData game2 = new GameData(456, null, null, "game", new ChessGame());
-        GameData game3 = new GameData(789, null, null, "game", new ChessGame());
-        GameData game4 = new GameData(0, null, null, "game", new ChessGame());
+        GameData game1 = new GameData(1, null, null, "game", new ChessGame());
+        GameData game2 = new GameData(2, null, null, "game", new ChessGame());
+        GameData game3 = new GameData(3, null, null, "game", new ChessGame());
+        GameData game4 = new GameData(4, null, null, "game", new ChessGame());
         accessGame.createGame(game1);
         accessGame.createGame(game2);
         accessGame.createGame(game3);
         accessGame.createGame(game4);
-        Collection<ChessGame> expectedGame = new ArrayList<>();
-        expectedGame.add(game1.game());
-        expectedGame.add(game2.game());
-        expectedGame.add(game3.game());
-        expectedGame.add(game4.game());
+        Collection<GameData> expectedGame = new ArrayList<>();
+        expectedGame.add(game1);
+        expectedGame.add(game2);
+        expectedGame.add(game3);
+        expectedGame.add(game4);
         Collection<GameData> game = accessGame.listGame();
         Assertions.assertEquals(expectedGame, game);
     }

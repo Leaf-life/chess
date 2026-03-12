@@ -6,11 +6,11 @@ public interface AuthAccess {
 
     void createAuth(AuthData authorization);
 
-    AuthData getAuth(String authToken);
+    AuthData getAuth(String authToken) throws DataAccessException;
 
     void deleteAuth(String authToken);
 
-    void clearAuths();
+    void clearAuths() throws DataAccessException;
 
     String listAuths();
 }
