@@ -16,52 +16,59 @@ public class SqlAccessAuth implements AuthAccess{
     }
 
     public void createAuth(AuthData authorization){
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+        try (var conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(true);
             if (authorization.authToken().matches("[a-zA-z0-9]+") && authorization.username().matches("[a-zA-z]+")) {
-                try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authTocken, username) VALUES(?, ?)")) {
+                try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES(?, ?)")) {
                     preparedStatement.setString(1, authorization.authToken());
                     preparedStatement.setString(2, authorization.username());
 
                     preparedStatement.executeUpdate();
                 }
             }
-        } catch (SQLException e) {
+        } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     public AuthData getAuth(String authToken){
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
-            try (var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM auth WHERE authTocken=?")) {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM auth WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
                 try (var rs = preparedStatement.executeQuery()) {
-                   String token = rs.getString("authToken");
-                   String name = rs.getString("username");
-                   return (new AuthData(token, name));
+                    if (rs.next()) {
+                        String token = rs.getString("authToken");
+                        String name = rs.getString("username");
+                        return (new AuthData(token, name));
+                    } else{
+                        throw new DataAccessException("no data their exists", 500);
+                    }
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void deleteAuth(String authToken){
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+        try (var conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(true);
             try (var preparedStatement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
                 preparedStatement.setString(1, authToken);
                 preparedStatement.executeUpdate();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
     public void clearAuths(){
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+        try (var conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(true);
             try (var preparedStatement = conn.prepareStatement("TRUNCATE auth")) {
                 preparedStatement.executeUpdate();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -73,7 +80,7 @@ public class SqlAccessAuth implements AuthAccess{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS  auth (
-              `authToken` varchar(256) NOT NULL,
+              `authToken` varchar(36) NOT NULL,
               `username` varchar(256) NOT NULL,
               PRIMARY KEY (`authToken`),
               INDEX(username)

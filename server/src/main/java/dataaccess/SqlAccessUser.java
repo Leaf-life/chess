@@ -3,10 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import model.*;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class SqlAccessUser implements UserAccess {
 
@@ -15,9 +12,10 @@ public class SqlAccessUser implements UserAccess {
     }
 
     public void createUser(UserData user){
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+        try (var conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(true);
             if (user.username().matches("[a-zA-z0-9]+") && user.email().matches("[a-zA-z0-9]+")) {
-                try (var preparedStatement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES(?, ?, ?)")) {
+                try (var preparedStatement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES(?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
                     preparedStatement.setString(1, user.username());
                     preparedStatement.setString(2, user.password());
                     preparedStatement.setString(3, user.email());
@@ -25,30 +23,34 @@ public class SqlAccessUser implements UserAccess {
                     preparedStatement.executeUpdate();
                 }
             }
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
 
     public UserData getUser(String username) throws DataAccessException{
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+        try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM user WHERE username=?")) {
                 preparedStatement.setString(1, username);
                 try (var rs = preparedStatement.executeQuery()) {
-                    return readuser(rs);
+                    if (rs.next()) {
+                        return readuser(rs);
+                    }
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        return null;
     }
 
     public void clearUsers(){
-        try (var conn = DriverManager.getConnection("jdbc:mysql://localhost:3306", "root", "passCauseImLazy")) {
+        try (var conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(true);
             try (var preparedStatement = conn.prepareStatement("TRUNCATE user")) {
                 preparedStatement.executeUpdate();
             }
-        } catch (SQLException e) {
+        } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
         }
     }

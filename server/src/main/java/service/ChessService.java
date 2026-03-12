@@ -5,6 +5,7 @@ import model.*;
 import dataaccess.*;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class ChessService {
 
@@ -50,7 +51,8 @@ public class ChessService {
         if (user == null || !(user.password().equals(password))){
             throw new DataAccessException("unauthorized", 401);
         }
-        AuthData auth = new AuthData(Integer.toString(nextAuthToken), username);
+        String token = UUID.randomUUID().toString();
+        AuthData auth = new AuthData(token, username);
         nextAuthToken++;
         authaccess.createAuth(auth);
         return auth;

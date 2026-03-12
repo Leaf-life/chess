@@ -8,8 +8,9 @@ import java.util.Collection;
 public class AccessGame implements GameAccess {
     private final Collection<GameData> games = new ArrayList<>();
 
-    public void createGame(GameData game) throws DataAccessException{
+    public int createGame(GameData game) throws DataAccessException{
         games.add(game);
+        return game.gameID();
     }
 
     public GameData getGame(int gameID) throws DataAccessException{
