@@ -17,8 +17,8 @@ public class SqlAccessUser implements UserAccess {
 
     public void createUser(UserData user){
         try (var conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES(?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            String statement = "INSERT INTO user (username, password, email) VALUES(?, ?, ?)";
+            try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, user.username());
                 preparedStatement.setString(2, user.password());
                 preparedStatement.setString(3, user.email());
@@ -32,7 +32,8 @@ public class SqlAccessUser implements UserAccess {
 
     public UserData getUser(String username) throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM user WHERE username=?")) {
+            String statement = "SELECT username, password, email FROM user WHERE username=?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, username);
                 try (var rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
@@ -48,8 +49,8 @@ public class SqlAccessUser implements UserAccess {
 
     public void clearUsers() throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE user")) {
+            String statement = "TRUNCATE TABLE user";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {

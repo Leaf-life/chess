@@ -22,7 +22,8 @@ public class SqlAccessAuth implements AuthAccess{
     public void createAuth(AuthData authorization){
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES(?, ?)")) {
+            String statement = "INSERT INTO auth (authToken, username) VALUES(?, ?)";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, authorization.authToken());
                 preparedStatement.setString(2, authorization.username());
 
@@ -35,7 +36,8 @@ public class SqlAccessAuth implements AuthAccess{
 
     public AuthData getAuth(String authToken) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM auth WHERE authToken=?")) {
+            String statement = "SELECT authToken, username FROM auth WHERE authToken=?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, authToken);
                 try (var rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
@@ -55,7 +57,8 @@ public class SqlAccessAuth implements AuthAccess{
     public void deleteAuth(String authToken){
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("DELETE FROM auth WHERE authToken=?")) {
+            String statement = "DELETE FROM auth WHERE authToken=?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, authToken);
                 preparedStatement.executeUpdate();
             }
@@ -66,8 +69,8 @@ public class SqlAccessAuth implements AuthAccess{
 
     public void clearAuths() throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE auth")) {
+            String statement = "TRUNCATE TABLE auth";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {

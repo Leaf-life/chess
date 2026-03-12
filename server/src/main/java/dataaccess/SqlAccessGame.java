@@ -20,7 +20,8 @@ public class SqlAccessGame implements GameAccess {
 
     public void updateGame(GameData game) throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("UPDATE game SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?", Statement.RETURN_GENERATED_KEYS)) {
+            String statement = "UPDATE game SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?";
+            try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, game.whiteUsername());
                 preparedStatement.setString(2, game.blackUsername());
                 preparedStatement.setString(3, game.gameName());
@@ -36,8 +37,8 @@ public class SqlAccessGame implements GameAccess {
 
     public int createGame(GameData game) throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("INSERT INTO game (whiteUsername, blackUsername, gameName, game) VALUES(?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+            String statement = "INSERT INTO game (whiteUsername, blackUsername, gameName, game) VALUES(?, ?, ?, ?)";
+            try (var preparedStatement = conn.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS)) {
                 preparedStatement.setString(1, game.whiteUsername());
                 preparedStatement.setString(2, game.blackUsername());
                 preparedStatement.setString(3, game.gameName());
@@ -59,7 +60,8 @@ public class SqlAccessGame implements GameAccess {
 
     public GameData getGame(int gameID) throws DataAccessException{
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?")) {
+            String statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game WHERE gameID=?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, Integer.toString(gameID));
                 try (var rs = preparedStatement.executeQuery()) {
                     if (rs.next()) {
@@ -75,8 +77,8 @@ public class SqlAccessGame implements GameAccess {
 
     public void deleteGame(GameData game){
         try (var conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("DELETE FROM game WHERE gameID=?")) {
+            String statement = "DELETE FROM game WHERE gameID=?";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, Integer.toString(game.gameID()));
                 preparedStatement.executeUpdate();
             }
@@ -113,7 +115,8 @@ public class SqlAccessGame implements GameAccess {
 
     public void clearGames() throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE game")) {
+            String statement = "TRUNCATE TABLE game";
+            try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
