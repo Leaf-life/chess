@@ -53,7 +53,7 @@ public class SqlAccessUser implements UserAccess {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
-            throw new DataAccessException(e.getMessage(), 401);
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
