@@ -11,20 +11,22 @@ import static java.sql.Types.NULL;
 
 public class SqlAccessAuth implements AuthAccess{
 
-    public SqlAccessAuth() throws DataAccessException{
-        configureDatabase();
+    public SqlAccessAuth(){
+        try {
+            configureDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void createAuth(AuthData authorization){
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
-            if (authorization.authToken().matches("[a-zA-z0-9]+") && authorization.username().matches("[a-zA-z]+")) {
-                try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES(?, ?)")) {
-                    preparedStatement.setString(1, authorization.authToken());
-                    preparedStatement.setString(2, authorization.username());
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO auth (authToken, username) VALUES(?, ?)")) {
+                preparedStatement.setString(1, authorization.authToken());
+                preparedStatement.setString(2, authorization.username());
 
-                    preparedStatement.executeUpdate();
-                }
+                preparedStatement.executeUpdate();
             }
         } catch (DataAccessException | SQLException e) {
             throw new RuntimeException(e);
@@ -65,7 +67,7 @@ public class SqlAccessAuth implements AuthAccess{
     public void clearAuths(){
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE auth")) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE auth")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {

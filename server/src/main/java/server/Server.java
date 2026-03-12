@@ -17,7 +17,7 @@ public class Server {
     private final Javalin javalin;
 
     public Server(){
-        this(new ChessService(new AccessUser(), new AccessGame(), new AccessAuth()));
+        this(new ChessService(new SqlAccessUser(), new SqlAccessGame(), new SqlAccessAuth()));
     }
 
     public Server(ChessService service) {
@@ -80,6 +80,7 @@ public class Server {
 
     private void clear(@NotNull Context context){
         service.clear();
+        context.status(200);
     }
 
     private void exceptionHandler(DataAccessException e, Context context){

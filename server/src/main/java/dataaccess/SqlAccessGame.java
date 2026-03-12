@@ -10,8 +10,28 @@ import java.util.Collection;
 
 public class SqlAccessGame implements GameAccess {
 
-    public SqlAccessGame() throws DataAccessException{
-        configureDatabase();
+    public SqlAccessGame(){
+        try {
+            configureDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateGame(GameData game) throws DataAccessException{
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement("UPDATE game SET whiteUsername = ?, blackUsername = ?, gameName = ?, game = ? WHERE gameID = ?", Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, game.whiteUsername());
+                preparedStatement.setString(2, game.blackUsername());
+                preparedStatement.setString(3, game.gameName());
+                preparedStatement.setString(4, new Gson().toJson(game.game()));
+                preparedStatement.setInt(5, game.gameID());
+
+                preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e.getMessage(), 500);
+        }
     }
 
     public int createGame(GameData game) throws DataAccessException{
@@ -30,10 +50,10 @@ public class SqlAccessGame implements GameAccess {
                     return rs.getInt(1);
                 }
 
-                return 0;
+                throw new DataAccessException("", 500);
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException(e.getMessage(), 500);
         }
     }
 
@@ -74,14 +94,14 @@ public class SqlAccessGame implements GameAccess {
         return new GameData(ID, white, black, gameName, game);
     }
 
-    public Collection<ChessGame> listGame() throws DataAccessException{
-        Collection<ChessGame> result = new ArrayList<>();
+    public Collection<GameData> listGame() throws DataAccessException{
+        Collection<GameData> result = new ArrayList<>();
         try (Connection conn = DatabaseManager.getConnection()) {
             var statement = "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM game";
             try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        result.add(readgame(rs).game());
+                        result.add(readgame(rs));
                     }
                 }
             }
@@ -93,8 +113,7 @@ public class SqlAccessGame implements GameAccess {
 
     public void clearGames(){
         try (var conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE game")) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE game")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
@@ -106,14 +125,14 @@ public class SqlAccessGame implements GameAccess {
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS game (
-              `gameID` int NOT NULL AUTO_INCREMENT,
+              `gameID` INT AUTO_INCREMENT,
               `whiteUsername` varchar(256),
               `blackUsername` varchar(256),
               `gameName` varchar(256) NOT NULL,
               `game` JSON,
               PRIMARY KEY (`gameID`),
               INDEX(gameName)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            ) AUTO_INCREMENT = 1, ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
 

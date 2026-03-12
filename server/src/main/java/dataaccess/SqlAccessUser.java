@@ -7,21 +7,23 @@ import java.sql.*;
 
 public class SqlAccessUser implements UserAccess {
 
-    public SqlAccessUser() throws DataAccessException{
-        configureDatabase();
+    public SqlAccessUser(){
+        try {
+            configureDatabase();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void createUser(UserData user){
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
-            if (user.username().matches("[a-zA-z0-9]+") && user.email().matches("[a-zA-z0-9]+")) {
-                try (var preparedStatement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES(?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
-                    preparedStatement.setString(1, user.username());
-                    preparedStatement.setString(2, user.password());
-                    preparedStatement.setString(3, user.email());
+            try (var preparedStatement = conn.prepareStatement("INSERT INTO user (username, password, email) VALUES(?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
+                preparedStatement.setString(1, user.username());
+                preparedStatement.setString(2, user.password());
+                preparedStatement.setString(3, user.email());
 
-                    preparedStatement.executeUpdate();
-                }
+                preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
             throw new RuntimeException(e);
@@ -47,7 +49,7 @@ public class SqlAccessUser implements UserAccess {
     public void clearUsers(){
         try (var conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(true);
-            try (var preparedStatement = conn.prepareStatement("TRUNCATE user")) {
+            try (var preparedStatement = conn.prepareStatement("TRUNCATE TABLE user")) {
                 preparedStatement.executeUpdate();
             }
         } catch (SQLException | DataAccessException e) {
