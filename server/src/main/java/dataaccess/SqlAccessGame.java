@@ -86,12 +86,12 @@ public class SqlAccessGame implements GameAccess {
     }
 
     private GameData readgame(ResultSet rs) throws SQLException {
-        int ID = rs.getInt("gameID");
+        int iD = rs.getInt("gameID");
         String white = rs.getString("whiteUsername");
         String black = rs.getString("blackUsername");
         String gameName = rs.getString("gameName");
         ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
-        return new GameData(ID, white, black, gameName, game);
+        return new GameData(iD, white, black, gameName, game);
     }
 
     public Collection<GameData> listGame() throws DataAccessException{

@@ -85,7 +85,7 @@ public class DOATests {
     @DisplayName("Create Game Neg")
     public void negCreateGameTest() throws DataAccessException{
         GameAccess accessGame= new SqlAccessGame();
-        int ID = accessGame.createGame(new GameData(123, null, null, "game", new ChessGame()));
+        int iD = accessGame.createGame(new GameData(123, null, null, "game", new ChessGame()));
         //assertThrows(RuntimeException.class, () -> {accessGame.createGame(new GameData(ID, null, null, "game", new ChessGame()));});
     }
 
@@ -95,8 +95,8 @@ public class DOATests {
     public void posGetGameTest() throws DataAccessException{
         GameAccess accessGame= new SqlAccessGame();
         GameData expectedGame = new GameData(123, null, null, "game", new ChessGame());
-        int ID = accessGame.createGame(expectedGame);
-        GameData game = accessGame.getGame(ID);
+        int iD = accessGame.createGame(expectedGame);
+        GameData game = accessGame.getGame(iD);
         Assertions.assertEquals(expectedGame.game(), game.game());
     }
 

@@ -68,8 +68,8 @@ public class ChessService {
             throw new DataAccessException("Bad request", 400);
         }
         GameData game = new GameData(0, null, null, gameName, new ChessGame());
-        int ID = gameaccess.createGame(game);
-        return new GameData(ID, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
+        int iD = gameaccess.createGame(game);
+        return new GameData(iD, game.whiteUsername(), game.blackUsername(), game.gameName(), game.game());
     }
 
     public Collection<GameData> listGame(String authtoken) throws DataAccessException{
