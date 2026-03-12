@@ -43,7 +43,7 @@ public class SqlAccessAuth implements AuthAccess{
                         String name = rs.getString("username");
                         return (new AuthData(token, name));
                     } else{
-                        throw new DataAccessException("no data their exists", 500);
+                        return null;
                     }
                 }
             }
