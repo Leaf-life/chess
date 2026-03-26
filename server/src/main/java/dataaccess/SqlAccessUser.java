@@ -1,8 +1,5 @@
 package dataaccess;
 
-import chess.ChessGame;
-import model.*;
-
 import java.sql.*;
 
 public class SqlAccessUser implements UserAccess {

@@ -5,7 +5,6 @@ import dataaccess.AccessUser;
 import dataaccess.DataAccessException;
 import model.AuthData;
 import model.UserData;
-import server.Server;
 
 public class RegistrationHandler {
     AccessUser users = new AccessUser();

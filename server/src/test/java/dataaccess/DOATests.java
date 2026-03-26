@@ -1,11 +1,7 @@
 package dataaccess;
 
 import chess.ChessGame;
-import model.*;
 import org.junit.jupiter.api.*;
-import passoff.model.TestUser;
-import passoff.server.TestServerFacade;
-import server.Server;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -14,6 +10,7 @@ import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import model.*;
 
 public class DOATests {
 

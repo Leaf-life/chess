@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.*;
-
 public interface AuthAccess {
 
     void createAuth(AuthData authorization);

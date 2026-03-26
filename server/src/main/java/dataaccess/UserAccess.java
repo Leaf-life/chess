@@ -1,7 +1,6 @@
 package dataaccess;
 
 import model.*;
-
 public interface UserAccess {
 
     void createUser(UserData user);

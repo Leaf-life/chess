@@ -3,9 +3,9 @@ package server;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
-import model.*;
 import service.*;
 import dataaccess.*;
+import model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;

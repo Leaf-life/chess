@@ -1,20 +1,17 @@
 package server;
 
-import com.google.gson.Gson;import passoff.exception.ResponseParseException;
+import com.google.gson.Gson;
+import exception.ResponseException;
 import java.net.http.HttpClient;
-
-import io.javalin.*;
-import io.javalin.http.Context;
-import model.*;
-import service.*;
-import dataaccess.*;
 
 import java.net.*;
 import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.Collection;
 
+import model.*;
 public class ServerFacade {
 
     private final HttpClient client = HttpClient.newHttpClient();
@@ -24,29 +21,38 @@ public class ServerFacade {
         this.serverUrl = serverUrl;
     }
 
-    public void registration() throws ResponseParseException{
-
-    }
-
-    public void login() throws ResponseParseException{
-
-    }
-
-    public void logout() throws ResponseParseException{
-
-    }
-
-    public void listGames() throws ResponseParseException{
-        var request = buildRequest("GET", "/pet", null);
+    public AuthData registration(UserData user) throws ResponseException{
+        var request = buildRequest("POST", "/user", user);
         var response = sendRequest(request);
-        return handleResponse(response, listGames.class);
+        return handleResponse(response, AuthData.class);
     }
 
-    public void createGame() throws ResponseParseException{
-
+    public AuthData login(String username, String password) throws ResponseException{
+        var request = buildRequest("POST", "/session", new LoginRequest(username, password));
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
     }
 
-    public void joinGame() throws ResponseParseException{
+    public void logout(String authtoken) throws ResponseException{
+        var request = buildRequest("DELETE", "/session", authtoken);
+        var response = sendRequest(request);
+    }
+
+    public Collection<GameData> listGames(String authtoken) throws ResponseException{
+        var request = buildRequest("GET", "/game", authtoken);
+        var response = sendRequest(request);
+        return handleResponse(response, Collection.class);
+    }
+
+    public GameData createGame(String authToken, String gameName) throws ResponseException{
+        var request = buildRequest("POST", "/game", new String[]{authToken, gameName});
+        var response = sendRequest(request);
+        return handleResponse(response, GameData.class);
+    }
+
+    public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException{
+        var request = buildRequest("POST", "/game", new JoinGameRquest(authToken, playerColor, gameID));
+        var response = sendRequest(request);
 
     }
 
@@ -68,7 +74,7 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws DataAccessException{
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException{
         try {
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex) {

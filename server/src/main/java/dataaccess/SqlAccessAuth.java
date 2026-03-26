@@ -1,14 +1,9 @@
 package dataaccess;
 
-import model.*;
-
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
-
+import model.*;
 public class SqlAccessAuth implements AuthAccess{
 
     public SqlAccessAuth(){
