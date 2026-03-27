@@ -14,8 +14,10 @@ import static ui.EscapeSequences.*;
 public class PostLoginClient {
     private final ServerFacade server;
     private final String serverURL;
+    private final String authToken;
 
-    public PostLoginClient(String serverUrl){
+    public PostLoginClient(String serverUrl, String authToken){
+        this.authToken = authToken;
         this.serverURL = serverUrl;
         server = new ServerFacade(serverUrl);
     }
@@ -120,14 +122,11 @@ public class PostLoginClient {
     }
 
     public String logout(String... params) throws ResponseException{
-        if (params.length >= 1) {
-            try{
-                server.logout(params[0]);
-                return "logout";
-            } catch (ResponseException e) {
-                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
-            }
+        try {
+            server.logout(authToken);
+            return "logout";
+        } catch (ResponseException e) {
+            throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "Expected: authToken");
     }
 }

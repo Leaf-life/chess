@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 
+import model.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;

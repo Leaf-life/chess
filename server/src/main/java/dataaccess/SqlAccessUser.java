@@ -1,5 +1,6 @@
 package dataaccess;
 
+import model.*;
 import java.sql.*;
 
 public class SqlAccessUser implements UserAccess {

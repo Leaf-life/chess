@@ -2,6 +2,7 @@ package server;
 
 import chess.*;
 import dataaccess.*;
+import model.*;
 import dataaccess.SqlAccessAuth;
 import service.ChessService;
 

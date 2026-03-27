@@ -29,9 +29,10 @@ public class LoginClient {
 
             try {
                 result = eval(line);
-                System.out.print(result);
-                if (!result.equals(help())){
-                    new PostLoginClient(serverURL).run();
+                System.out.println(result);
+                if (!result.equals(help()) && !result.equals("quit")){
+                    String[] tokens = result.split(" ");
+                    new PostLoginClient(serverURL, tokens[tokens.length - 1]).run();
                 }
             } catch (Throwable e) {
                 var msg = e.toString();
@@ -76,7 +77,7 @@ public class LoginClient {
     public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
             try{
-                AuthData result =  server.registration(new UserData(params[0], params[1], params[3]));
+                AuthData result =  server.registration(new UserData(params[0], params[1], params[2]));
                 return String.format("You registered as username: %s, authToken: %s", result.username(), result.authToken());
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
