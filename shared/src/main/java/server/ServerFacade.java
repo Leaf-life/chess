@@ -51,9 +51,13 @@ public class ServerFacade {
     }
 
     public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException{
-        var request = buildRequest("POST", "/game", new JoinGameRquest(authToken, playerColor, gameID));
-        var response = sendRequest(request);
+        var request = buildRequest("PUT", "/game", new JoinGameRquest(authToken, playerColor, gameID));
+        sendRequest(request);
+    }
 
+    public void observeGame(String authToken, int gameID) throws ResponseException{
+        var request = buildRequest("PUT", "/game", null);
+        sendRequest(request);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {

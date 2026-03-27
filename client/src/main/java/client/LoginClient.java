@@ -10,8 +10,7 @@ import java.util.Scanner;
 import static ui.EscapeSequences.*;
 public class LoginClient {
     private final ServerFacade server;
-    private String visitorName = null;
-    private String serverURL;
+    private final String serverURL;
 
     public LoginClient(String serverUrl){
         this.serverURL = serverUrl;
@@ -64,26 +63,24 @@ public class LoginClient {
 
     public String login(String... params) throws ResponseException {
         if (params.length >= 2) {
-            visitorName = params[0];
             try{
-                server.login(params[0], params[1]);
+                AuthData results =  server.login(params[0], params[1]);
+                return String.format("You signed in as username: %s, authToken: %s", results.username(), results.authToken());
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
-            return String.format("You signed in as %s.", visitorName);
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: username, and password");
     }
 
     public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
-            visitorName = params[0];
             try{
-                server.registration(new UserData(params[0], params[1], params[3]));
+                AuthData result =  server.registration(new UserData(params[0], params[1], params[3]));
+                return String.format("You registered as username: %s, authToken: %s", result.username(), result.authToken());
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
-            return String.format("You signed in as %s.", visitorName);
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: new username, new password, and email");
     }

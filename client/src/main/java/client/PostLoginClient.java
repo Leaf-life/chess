@@ -13,7 +13,7 @@ import static ui.EscapeSequences.*;
 
 public class PostLoginClient {
     private final ServerFacade server;
-    private String serverURL;
+    private final String serverURL;
 
     public PostLoginClient(String serverUrl){
         this.serverURL = serverUrl;
@@ -51,7 +51,7 @@ public class PostLoginClient {
                 case "listGames" -> listGames(params);
                 case "joinGame" -> joinGame(params);
                 case "observeGame" -> observeGame(params);
-                case "logout" -> "logout";
+                case "logout" -> logout(params);
                 default -> help();
             };
         } catch (ResponseException ex) {
@@ -67,7 +67,7 @@ public class PostLoginClient {
         if (params.length >= 2) {
             try{
                 GameData result = server.createGame(params[0], params[1]);
-                return String.format("You created game %s.", result.gameName());
+                return String.format("You created game %s (ID: %s)", result.gameName(), result.gameID());
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
@@ -79,7 +79,15 @@ public class PostLoginClient {
         if (params.length >= 1) {
             try{
                 Collection<GameData> result = server.listGames(params[0]);
-                return String.format("You created game %s.");
+                StringBuilder response = new StringBuilder("The games are:\n");
+                for (GameData x: result){
+                    response.append("Name: ")
+                            .append(x.gameName())
+                            .append(" ID: ")
+                            .append(x.gameID().toString())
+                            .append("\n");
+                }
+                return response.toString();
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
@@ -88,10 +96,38 @@ public class PostLoginClient {
     }
 
     public String joinGame(String... params) throws ResponseException {
-
+        if (params.length >= 3) {
+            try{
+                server.joinGame(params[0], params[1], Integer.parseInt(params[2]));
+                return "You joined the game";
+            } catch (ResponseException e) {
+                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: gameData");
     }
 
     public String observeGame(String... params) throws ResponseException {
+        if (params.length >= 2) {
+            try{
+                server.observeGame(params[0], Integer.parseInt(params[1]));
+                return "You are observing the game";
+            } catch (ResponseException e) {
+                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: gameData");
+    }
 
+    public String logout(String... params) throws ResponseException{
+        if (params.length >= 1) {
+            try{
+                server.logout(params[0]);
+                return "logout";
+            } catch (ResponseException e) {
+                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: authToken");
     }
 }
