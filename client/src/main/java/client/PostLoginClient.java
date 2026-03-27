@@ -2,14 +2,22 @@ package client;
 
 import exception.ResponseException;
 
+import server.ServerFacade;
+import model.*;
+
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
 public class PostLoginClient {
-    public PostLoginClient(String serverUrl){
+    private final ServerFacade server;
+    private String serverURL;
 
+    public PostLoginClient(String serverUrl){
+        this.serverURL = serverUrl;
+        server = new ServerFacade(serverUrl);
     }
 
     public void run(){
@@ -56,11 +64,27 @@ public class PostLoginClient {
     }
 
     public String createGame(String... params) throws ResponseException {
-
+        if (params.length >= 2) {
+            try{
+                GameData result = server.createGame(params[0], params[1]);
+                return String.format("You created game %s.", result.gameName());
+            } catch (ResponseException e) {
+                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: gameData");
     }
 
     public String listGames(String... params) throws ResponseException {
-
+        if (params.length >= 1) {
+            try{
+                Collection<GameData> result = server.listGames(params[0]);
+                return String.format("You created game %s.");
+            } catch (ResponseException e) {
+                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: gameData");
     }
 
     public String joinGame(String... params) throws ResponseException {
