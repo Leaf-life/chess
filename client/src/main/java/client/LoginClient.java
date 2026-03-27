@@ -11,8 +11,10 @@ import static ui.EscapeSequences.*;
 public class LoginClient {
     private final ServerFacade server;
     private String visitorName = null;
+    private String serverURL;
 
     public LoginClient(String serverUrl){
+        this.serverURL = serverUrl;
         server = new ServerFacade(serverUrl);
     }
 
@@ -29,6 +31,9 @@ public class LoginClient {
             try {
                 result = eval(line);
                 System.out.print(result);
+                if (!result.equals(help())){
+                    new PostLoginClient(serverURL).run();
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -59,7 +64,7 @@ public class LoginClient {
 
     public String login(String... params) throws ResponseException {
         if (params.length >= 2) {
-            visitorName = String.join("-", params);
+            visitorName = params[0];
             try{
                 server.login(params[0], params[1]);
             } catch (ResponseException e) {
@@ -72,7 +77,7 @@ public class LoginClient {
 
     public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
-            visitorName = String.join("-", params);
+            visitorName = params[0];
             try{
                 server.registration(new UserData(params[0], params[1], params[3]));
             } catch (ResponseException e) {
