@@ -35,7 +35,7 @@ public class ServerFacade {
 
     public void logout(String authtoken) throws ResponseException{
         var request = buildRequest("DELETE", "/session", authtoken);
-        var response = sendRequest(request);
+        sendRequest(request);
     }
 
     public Collection<GameData> listGames(String authtoken) throws ResponseException{
@@ -45,7 +45,7 @@ public class ServerFacade {
     }
 
     public GameData createGame(String authToken, String gameName) throws ResponseException{
-        var request = buildRequest("POST", "/game", new String[]{authToken, gameName});
+        var request = buildRequest("POST", "/game", new CreateGameRequest(authToken, gameName));
         var response = sendRequest(request);
         return handleResponse(response, GameData.class);
     }

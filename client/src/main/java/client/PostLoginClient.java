@@ -68,7 +68,7 @@ public class PostLoginClient {
     public String createGame(String... params) throws ResponseException {
         if (params.length >= 2) {
             try{
-                GameData result = server.createGame(params[0], params[1]);
+                GameData result = server.createGame(authToken, params[1]);
                 return String.format("You created game %s (ID: %s)", result.gameName(), result.gameID());
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
@@ -80,7 +80,7 @@ public class PostLoginClient {
     public String listGames(String... params) throws ResponseException {
         if (params.length >= 1) {
             try{
-                Collection<GameData> result = server.listGames(params[0]);
+                Collection<GameData> result = server.listGames(authToken);
                 StringBuilder response = new StringBuilder("The games are:\n");
                 for (GameData x: result){
                     response.append("Name: ")
@@ -100,7 +100,7 @@ public class PostLoginClient {
     public String joinGame(String... params) throws ResponseException {
         if (params.length >= 3) {
             try{
-                server.joinGame(params[0], params[1], Integer.parseInt(params[2]));
+                server.joinGame(authToken, params[1], Integer.parseInt(params[2]));
                 return "You joined the game";
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
@@ -112,7 +112,7 @@ public class PostLoginClient {
     public String observeGame(String... params) throws ResponseException {
         if (params.length >= 2) {
             try{
-                server.observeGame(params[0], Integer.parseInt(params[1]));
+                server.observeGame(authToken, Integer.parseInt(params[1]));
                 return "You are observing the game";
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());

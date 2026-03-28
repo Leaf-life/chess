@@ -3,6 +3,7 @@ package client;
 import dataaccess.*;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import server.Server;
@@ -35,10 +36,10 @@ public class ServerFacadeTests {
     }
 
 
-    //@Test
-    //public void sampleTest() {
-       // Assertions.assertTrue(true);
-    //}
+    @Test
+    public void sampleTest() {
+        Assertions.assertTrue(true);
+    }
 
     @Test
     @Order(1)
@@ -58,12 +59,51 @@ public class ServerFacadeTests {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     @DisplayName("Logout Pos")
     public void posLogoutTest() throws ResponseException {
         AuthData auth = serverFacade.registration(new UserData("user", "pass", "email@123"));
         serverFacade.logout(auth.authToken());
         Assertions.assertThrows(ResponseException.class,() -> {serverFacade.createGame(auth.authToken(), "game1");});
+    }
+    @Test
+    @Order(4)
+    @DisplayName("Logout Negative")
+    public void negLogoutTest() throws ResponseException {
+        Assertions.assertThrows(ResponseException.class,() -> {serverFacade.logout("123");});
+    }
+
+    @Test
+    @Order(5)
+    @DisplayName("Login Positive")
+    public void posLoginTest() throws ResponseException {
+        AuthData auth = serverFacade.registration(new UserData("user", "pass", "email@123"));
+        serverFacade.logout(auth.authToken());
+        auth = serverFacade.login("user", "pass");
+        Assertions.assertEquals("user", auth.username());
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Login Negative")
+    public void negLoginTest() throws ResponseException {
+        Assertions.assertThrows(ResponseException.class,() -> {serverFacade.login("user", "pass");});
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Create Game Positive")
+    public void posCreateGameTest() throws ResponseException {
+        AuthData auth = serverFacade.registration(new UserData("user", "pass", "email@123"));
+        GameData game = serverFacade.createGame(auth.authToken(), "game1");
+        Assertions.assertEquals("game1", game.gameName());
+    }
+
+    @Test
+    @Order(8)
+    @DisplayName("Create Game Negative")
+    public void negCreateGameTest() throws ResponseException {
+        Assertions.assertThrows(ResponseException.class,() -> {serverFacade.createGame("123", "game1");});
     }
 
     public static void clearDatabases() throws DataAccessException{
