@@ -66,7 +66,7 @@ public class Server {
         Gson gson = new Gson();
         String authToken = context.header("Authorization");
         CreateGameRequest gameName = gson.fromJson(context.body(), CreateGameRequest.class);
-        GameData game = service.createGame(authToken, gameName.gameName());
+        GameData game = service.createGame(new CreateGameRequest(authToken, gameName.gameName()));
         var serializer = new Gson();
         var json = serializer.toJson(game);
         context.json(json);

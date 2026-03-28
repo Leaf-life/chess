@@ -63,7 +63,9 @@ public class ChessService {
         authaccess.deleteAuth(authtoken);
     }
 
-    public GameData createGame(String authToken, String gameName) throws DataAccessException{
+    public GameData createGame(CreateGameRequest create) throws DataAccessException{
+        String authToken = create.Authorization();
+        String gameName = create.gameName();
         checklogin(authToken);
         if (gameName == null){
             throw new DataAccessException("Bad request", 400);

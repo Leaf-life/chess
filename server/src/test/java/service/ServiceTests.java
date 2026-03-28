@@ -83,7 +83,7 @@ public class ServiceTests {
     public void testCreateGamePositive() throws DataAccessException{
         UserData user = new UserData("user", "pass", "email");
         AuthData auth = chessservice.registration(user);
-        GameData game = chessservice.createGame(auth.authToken(), "bestGame");
+        GameData game = chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame"));
         Assertions.assertNotNull(game);
     }
 
@@ -91,7 +91,7 @@ public class ServiceTests {
     @Order(8)
     @DisplayName("createGame Negative")
     public void testCreateGameNegative() throws DataAccessException{
-        assertThrows(DataAccessException.class, () -> {chessservice.createGame("0", "bestGame");});
+        assertThrows(DataAccessException.class, () -> {chessservice.createGame(new CreateGameRequest("0", "bestGame"));});
     }
 
     @Test
@@ -100,9 +100,9 @@ public class ServiceTests {
     public void testListGamesPositive() throws DataAccessException{
         UserData user = new UserData("user", "pass", "email");
         AuthData auth = chessservice.registration(user);
-        chessservice.createGame(auth.authToken(), "bestGame1");
-        chessservice.createGame(auth.authToken(), "bestGame2");
-        chessservice.createGame(auth.authToken(), "bestGame3");
+        chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame1"));
+        chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame2"));
+        chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame3"));
         Collection<GameData> games = chessservice.listGame(auth.authToken());
         Collection<GameData> expectedGames = new ArrayList<>();
         expectedGames.add(new GameData(1, null, null, "bestGame1", new ChessGame()));
@@ -117,9 +117,9 @@ public class ServiceTests {
     public void testListGamesNegative() throws DataAccessException{
         UserData user = new UserData("user", "pass", "email");
         AuthData auth = chessservice.registration(user);
-        chessservice.createGame(auth.authToken(), "bestGame1");
-        chessservice.createGame(auth.authToken(), "bestGame2");
-        chessservice.createGame(auth.authToken(), "bestGame3");
+        chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame1"));
+        chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame2"));
+        chessservice.createGame(new CreateGameRequest(auth.authToken(), "bestGame3"));
         assertThrows(DataAccessException.class, () -> {chessservice.listGame(null);});
     }
 
@@ -131,7 +131,7 @@ public class ServiceTests {
         AuthData auth1 = chessservice.registration(user1);
         UserData user2 = new UserData("user2", "pass", "email");
         AuthData auth2 = chessservice.registration(user2);
-        GameData game = chessservice.createGame(auth1.authToken(), "bestGame1");
+        GameData game = chessservice.createGame(new CreateGameRequest(auth1.authToken(), "bestGame1"));
         chessservice.joinGame(auth2.authToken(), "BLACK", game.gameID());
         Collection<GameData> games = chessservice.listGame(auth2.authToken());
         Assertions.assertEquals(1, games.toArray().length);
@@ -145,7 +145,7 @@ public class ServiceTests {
         AuthData auth1 = chessservice.registration(user1);
         UserData user2 = new UserData("user2", "pass", "email");
         AuthData auth2 = chessservice.registration(user2);
-        GameData game = chessservice.createGame(auth1.authToken(), "bestGame1");
+        GameData game = chessservice.createGame(new CreateGameRequest(auth1.authToken(), "bestGame1"));
         chessservice.joinGame(auth2.authToken(), "WHITE", game.gameID());
         assertThrows(DataAccessException.class, () -> {chessservice.joinGame(auth2.authToken(), "WHITE", game.gameID());});
     }

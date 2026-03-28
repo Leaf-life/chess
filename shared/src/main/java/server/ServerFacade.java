@@ -1,6 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import exception.ResponseException;
 import java.net.http.HttpClient;
 
@@ -9,7 +12,9 @@ import java.net.http.*;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 import model.*;
 public class ServerFacade {
@@ -22,52 +27,64 @@ public class ServerFacade {
     }
 
     public AuthData registration(UserData user) throws ResponseException{
-        var request = buildRequest("POST", "/user", user);
+        HttpRequest.Builder requestBuild = buildRequest("POST", "/user", user);
+        var request = requestBuild.build();
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
     public AuthData login(String username, String password) throws ResponseException{
-        var request = buildRequest("POST", "/session", new LoginRequest(username, password));
+        HttpRequest.Builder requestBuild = buildRequest("POST", "/session", new LoginRequest(username, password));
+        var request = requestBuild.build();
         var response = sendRequest(request);
         return handleResponse(response, AuthData.class);
     }
 
-    public void logout(String authtoken) throws ResponseException{
-        var request = buildRequest("DELETE", "/session", authtoken);
+    public void logout(String authToken) throws ResponseException{
+        HttpRequest.Builder requestBuild = buildRequest("DELETE", "/session", authToken);
+        requestBuild.setHeader("Authorization", authToken);
+        var request = requestBuild.build();
         sendRequest(request);
     }
 
-    public Collection<GameData> listGames(String authtoken) throws ResponseException{
-        var request = buildRequest("GET", "/game", authtoken);
+    public Collection<GameData> listGames(String authToken) throws ResponseException{
+        HttpRequest.Builder requestBuild = buildRequest("GET", "/game", authToken);
+        requestBuild.setHeader("Authorization", authToken);
+        var request = requestBuild.build();
         var response = sendRequest(request);
-        return handleResponse(response, Collection.class);
+        return handleResponse(response, GameList.class);
     }
 
     public GameData createGame(String authToken, String gameName) throws ResponseException{
-        var request = buildRequest("POST", "/game", new CreateGameRequest(authToken, gameName));
+        HttpRequest.Builder requestBuild = buildRequest("POST", "/game", new CreateGameRequest(authToken, gameName));
+        requestBuild.setHeader("Authorization", authToken);
+        var request = requestBuild.build();
         var response = sendRequest(request);
         return handleResponse(response, GameData.class);
     }
 
     public void joinGame(String authToken, String playerColor, int gameID) throws ResponseException{
-        var request = buildRequest("PUT", "/game", new JoinGameRquest(authToken, playerColor, gameID));
+        HttpRequest.Builder requestBuild = buildRequest("PUT", "/game", new JoinGameRquest(authToken, playerColor, gameID));
+        requestBuild.setHeader("Authorization", authToken);
+        var request = requestBuild.build();
         sendRequest(request);
     }
 
     public void observeGame(String authToken, int gameID) throws ResponseException{
-        var request = buildRequest("PUT", "/game", null);
+        HttpRequest.Builder requestBuild = buildRequest("PUT", "/game", null);
+        requestBuild.setHeader("Authorization", authToken);
+        var request = requestBuild.build();
         sendRequest(request);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    private HttpRequest.Builder buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
         }
-        return request.build();
+        return request;
     }
 
     private BodyPublisher makeRequestBody(Object request) {
@@ -98,6 +115,12 @@ public class ServerFacade {
         }
 
         if (responseClass != null) {
+            if (responseClass == GameList.class){
+                JsonObject obj = JsonParser.parseString(response.body()).getAsJsonObject();
+                JsonArray arr = obj.getAsJsonArray("games");
+
+                return new Gson().fromJson(arr, responseClass);
+            }
             return new Gson().fromJson(response.body(), responseClass);
         }
 

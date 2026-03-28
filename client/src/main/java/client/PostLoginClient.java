@@ -34,7 +34,11 @@ public class PostLoginClient {
 
             try {
                 result = eval(line);
-                System.out.print(result);
+                System.out.println(result);
+                String[] tokens = line.toLowerCase().split(" ");
+                if (tokens[0].equals("joingame") || tokens[0].equals("observegame")){
+                    new GameClient(serverURL, tokens[1] ,Integer.parseInt(result), authToken).run();
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -49,10 +53,10 @@ public class PostLoginClient {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "createGame" -> createGame(params);
-                case "listGames" -> listGames(params);
-                case "joinGame" -> joinGame(params);
-                case "observeGame" -> observeGame(params);
+                case "creategame" -> createGame(params);
+                case "listgames" -> listGames(params);
+                case "joingame" -> joinGame(params);
+                case "observegame" -> observeGame(params);
                 case "logout" -> logout(params);
                 default -> help();
             };
@@ -62,13 +66,13 @@ public class PostLoginClient {
     }
 
     public String help(){
-        return "help \n logout \n createGame \n listGame \n playGame \n observeGame \n";
+        return "help \n logout \n createGame \n listGames \n playGame \n observeGame \n";
     }
 
     public String createGame(String... params) throws ResponseException {
-        if (params.length >= 2) {
+        if (params.length >= 1) {
             try{
-                GameData result = server.createGame(authToken, params[1]);
+                GameData result = server.createGame(authToken, params[0]);
                 return String.format("You created game %s (ID: %s)", result.gameName(), result.gameID());
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
@@ -78,7 +82,7 @@ public class PostLoginClient {
     }
 
     public String listGames(String... params) throws ResponseException {
-        if (params.length >= 1) {
+        if (params.length == 0) {
             try{
                 Collection<GameData> result = server.listGames(authToken);
                 StringBuilder response = new StringBuilder("The games are:\n");
@@ -87,6 +91,10 @@ public class PostLoginClient {
                             .append(x.gameName())
                             .append(" ID: ")
                             .append(x.gameID().toString())
+                            .append(" White Player: ")
+                            .append(x.whiteUsername())
+                            .append(" Black Player: ")
+                            .append(x.blackUsername())
                             .append("\n");
                 }
                 return response.toString();
@@ -98,10 +106,11 @@ public class PostLoginClient {
     }
 
     public String joinGame(String... params) throws ResponseException {
-        if (params.length >= 3) {
+        if (params.length >= 2) {
             try{
-                server.joinGame(authToken, params[1], Integer.parseInt(params[2]));
-                return "You joined the game";
+                server.joinGame(authToken, params[0].toUpperCase(), Integer.parseInt(params[1]));
+                System.out.println("You have joined the game");
+                return params[1];
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
@@ -110,10 +119,11 @@ public class PostLoginClient {
     }
 
     public String observeGame(String... params) throws ResponseException {
-        if (params.length >= 2) {
+        if (params.length >= 1) {
             try{
-                server.observeGame(authToken, Integer.parseInt(params[1]));
-                return "You are observing the game";
+                server.observeGame(authToken, Integer.parseInt(params[0]));
+                System.out.println("You are observing the game");
+                return "";
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }

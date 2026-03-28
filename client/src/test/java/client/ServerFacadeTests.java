@@ -9,6 +9,9 @@ import org.junit.jupiter.api.*;
 import server.Server;
 import server.ServerFacade;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 
 public class ServerFacadeTests {
 
@@ -104,6 +107,40 @@ public class ServerFacadeTests {
     @DisplayName("Create Game Negative")
     public void negCreateGameTest() throws ResponseException {
         Assertions.assertThrows(ResponseException.class,() -> {serverFacade.createGame("123", "game1");});
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("Join Game Pos")
+    public void posJoinGameTest() throws ResponseException {
+        AuthData auth = serverFacade.registration(new UserData("user", "pass", "email@123"));
+        GameData game = serverFacade.createGame(auth.authToken(), "game1");
+        serverFacade.joinGame(auth.authToken(), "WHITE", game.gameID());
+        Assertions.assertEquals("game1", game.gameName());
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("Join Game Neg")
+    public void negJoinGameTest() throws ResponseException {
+        AuthData auth = serverFacade.registration(new UserData("user", "pass", "email@123"));
+        GameData game = serverFacade.createGame(auth.authToken(), "game1");
+        serverFacade.joinGame(auth.authToken(), "WHITE", game.gameID());
+        Assertions.assertThrows(ResponseException.class,() -> {serverFacade.joinGame(auth.authToken(), "WHITE" ,43245634);});
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("List Game Pos")
+    public void posListGameTest() throws ResponseException {
+        AuthData auth = serverFacade.registration(new UserData("user", "pass", "email@123"));
+        GameData game = serverFacade.createGame(auth.authToken(), "game1");
+        GameData game1 = serverFacade.createGame(auth.authToken(), "game2");
+        Collection<GameData> expectedGames = new ArrayList<>();
+        expectedGames.add(game);
+        expectedGames.add(game1);
+        Collection<GameData> gameList = serverFacade.listGames(auth.authToken());
+        Assertions.assertEquals(expectedGames, gameList);
     }
 
     public static void clearDatabases() throws DataAccessException{
