@@ -64,7 +64,7 @@ public class ChessService {
     }
 
     public GameData createGame(CreateGameRequest create) throws DataAccessException{
-        String authToken = create.Authorization();
+        String authToken = create.authToken();
         String gameName = create.gameName();
         checklogin(authToken);
         if (gameName == null){

@@ -6,9 +6,20 @@ import java.sql.SQLException;
 import model.*;
 public class SqlAccessAuth implements AuthAccess{
 
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS  auth (
+              `authToken` varchar(36) NOT NULL,
+              `username` varchar(256) NOT NULL,
+              PRIMARY KEY (`authToken`),
+              INDEX(username)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
+
     public SqlAccessAuth(){
         try {
-            configureDatabase();
+            new SqlAccessShared(createStatements).configureDatabase();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -75,29 +86,5 @@ public class SqlAccessAuth implements AuthAccess{
 
     public String listAuths(){
         return null;
-    }
-
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS  auth (
-              `authToken` varchar(36) NOT NULL,
-              `username` varchar(256) NOT NULL,
-              PRIMARY KEY (`authToken`),
-              INDEX(username)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()), 400);
-        }
     }
 }

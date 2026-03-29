@@ -48,8 +48,29 @@ public class GameClient {
         System.out.println();
     }
 
-    public String eval(String Line){
-        return Line;
+    public String eval(String line){
+        return line;
+    }
+
+
+
+    public String getPieceSymbol(ChessPiece piece){
+        if (piece == null){
+            return " ";
+        }
+
+        String symbol = switch (piece.getPieceType()) {
+            case KING -> "k";
+            case QUEEN -> "q";
+            case ROOK -> "r";
+            case BISHOP -> "b";
+            case KNIGHT -> "n";
+            case PAWN -> "p";
+        };
+
+        return piece.getTeamColor() == ChessGame.TeamColor.WHITE
+                ? symbol.toUpperCase()
+                : symbol;
     }
 
     public String printBoard(ChessGame game){
@@ -58,32 +79,10 @@ public class GameClient {
         for (int x = 1; x <= 8; x++) {
             for (int y = 1; y <= 8; y++) {
                 ChessPiece piece = board.getPiece(new ChessPosition(x, y));
-                if (piece != null) {
-                    if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
-                        switch (piece.getPieceType()) {
-                            case KING -> result.append("|K");
-                            case QUEEN -> result.append("|Q");
-                            case ROOK -> result.append("|R");
-                            case BISHOP -> result.append("|B");
-                            case KNIGHT -> result.append("|N");
-                            case PAWN -> result.append("|P");
-                            default -> result.append("| ");
-                        }
-                    } else {
-                        switch (piece.getPieceType()) {
-                            case KING -> result.append("|k");
-                            case QUEEN -> result.append("|q");
-                            case ROOK -> result.append("|r");
-                            case BISHOP -> result.append("|b");
-                            case KNIGHT -> result.append("|n");
-                            case PAWN -> result.append("|p");
-                            default -> result.append("| ");
-                        }
-                    }
-                    result.append("| ");
-                }
-                result.append("|\n");
+                result.append("|");
+                result.append(getPieceSymbol(piece));
             }
+            result.append("|\n");
         }
         return result.toString();
     }

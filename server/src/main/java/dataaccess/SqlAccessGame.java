@@ -10,9 +10,23 @@ import java.util.Collection;
 
 public class SqlAccessGame implements GameAccess {
 
+    private final String[] createStatements = {
+            """
+            CREATE TABLE IF NOT EXISTS game (
+              `gameID` INT AUTO_INCREMENT,
+              `whiteUsername` varchar(256),
+              `blackUsername` varchar(256),
+              `gameName` varchar(256) NOT NULL,
+              `game` JSON,
+              PRIMARY KEY (`gameID`),
+              INDEX(gameName)
+            ) AUTO_INCREMENT = 1, ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+    };
+
     public SqlAccessGame(){
         try {
-            configureDatabase();
+            new SqlAccessShared(createStatements).configureDatabase();
         } catch (DataAccessException e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -121,34 +135,6 @@ public class SqlAccessGame implements GameAccess {
             }
         } catch (SQLException | DataAccessException e) {
             throw new DataAccessException("" + e.getMessage(), 500);
-        }
-    }
-
-
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS game (
-              `gameID` INT AUTO_INCREMENT,
-              `whiteUsername` varchar(256),
-              `blackUsername` varchar(256),
-              `gameName` varchar(256) NOT NULL,
-              `game` JSON,
-              PRIMARY KEY (`gameID`),
-              INDEX(gameName)
-            ) AUTO_INCREMENT = 1, ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (Connection conn = DatabaseManager.getConnection()) {
-            for (String statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()), 400);
         }
     }
 }
