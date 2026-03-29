@@ -55,8 +55,8 @@ public class GameClient {
     public String printBoard(ChessGame game){
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
-        for (int x = 1; x <= 8; x++){
-            for (int y = 1; y<= 8; y++){
+        for (int x = 1; x <= 8; x++) {
+            for (int y = 1; y <= 8; y++) {
                 ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                 if (piece != null) {
                     if (piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
@@ -69,7 +69,7 @@ public class GameClient {
                             case PAWN -> result.append("|P");
                             default -> result.append("| ");
                         }
-                    } else{
+                    } else {
                         switch (piece.getPieceType()) {
                             case KING -> result.append("|k");
                             case QUEEN -> result.append("|q");
@@ -78,11 +78,12 @@ public class GameClient {
                             case KNIGHT -> result.append("|n");
                             case PAWN -> result.append("|p");
                             default -> result.append("| ");
+                        }
                     }
+                    result.append("| ");
                 }
-                result.append("| ");
+                result.append("|\n");
             }
-            result.append("|\n");
         }
         return result.toString();
     }
