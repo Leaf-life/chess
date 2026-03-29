@@ -9,6 +9,7 @@ import model.GameData;
 import server.ServerFacade;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.RESET;
@@ -76,13 +77,24 @@ public class GameClient {
     public String printBoard(ChessGame game){
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
-        for (int x = 1; x <= 8; x++) {
-            for (int y = 1; y <= 8; y++) {
-                ChessPiece piece = board.getPiece(new ChessPosition(x, y));
-                result.append("|");
-                result.append(getPieceSymbol(piece));
+        if (Objects.equals(playColor, "black")) {
+            for (int x = 1; x <= 8; x++) {
+                for (int y = 1; y <= 8; y++) {
+                    ChessPiece piece = board.getPiece(new ChessPosition(x, y));
+                    result.append("|");
+                    result.append(getPieceSymbol(piece));
+                }
+                result.append("|\n");
             }
-            result.append("|\n");
+        } else {
+            for (int x = 8; x >= 1; x--) {
+                for (int y = 8; y >= 1; y--) {
+                    ChessPiece piece = board.getPiece(new ChessPosition(x, y));
+                    result.append("|");
+                    result.append(getPieceSymbol(piece));
+                }
+                result.append("|\n");
+            }
         }
         return result.toString();
     }

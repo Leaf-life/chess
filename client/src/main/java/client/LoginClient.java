@@ -30,8 +30,8 @@ public class LoginClient {
             try {
                 result = eval(line);
                 System.out.println(result);
-                if (!result.equals(help()) && !result.equals("quit")){
-                    String[] tokens = result.split(" ");
+                String[] tokens = result.split(" ");
+                if (tokens[0].equals("Success")){
                     new PostLoginClient(serverURL, tokens[tokens.length - 1]).run();
                 }
             } catch (Throwable e) {
@@ -66,9 +66,9 @@ public class LoginClient {
         if (params.length >= 2) {
             try{
                 AuthData results =  server.login(params[0], params[1]);
-                return String.format("You signed in as username: %s, authToken: %s", results.username(), results.authToken());
+                return String.format("Success You signed in as username: %s, authToken: %s", results.username(), results.authToken());
             } catch (ResponseException e) {
-                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+                throw new ResponseException(e.code(), "username and/or password is incorrect");
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: username, and password");
@@ -78,9 +78,9 @@ public class LoginClient {
         if (params.length >= 3) {
             try{
                 AuthData result =  server.registration(new UserData(params[0], params[1], params[2]));
-                return String.format("You registered as username: %s, authToken: %s", result.username(), result.authToken());
+                return String.format("Success You registered as username: %s, authToken: %s", result.username(), result.authToken());
             } catch (ResponseException e) {
-                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+                throw new ResponseException(e.code(), "user already taken");
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: new username, new password, and email");

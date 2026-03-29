@@ -26,7 +26,7 @@ public class ResponseException extends Exception {
             String message = map.get("message").toString();
             return new ResponseException(status, message);
         }
-        return new ResponseException(Code.ServerError, "null map");
+        return new ResponseException(Code.ServerError, "incorrect input");
     }
 
     public Code code() {
