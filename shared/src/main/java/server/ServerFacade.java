@@ -44,7 +44,8 @@ public class ServerFacade {
         HttpRequest.Builder requestBuild = buildRequest("DELETE", "/session", authToken);
         requestBuild.setHeader("Authorization", authToken);
         var request = requestBuild.build();
-        sendRequest(request);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public Collection<GameData> listGames(String authToken) throws ResponseException{
@@ -67,14 +68,21 @@ public class ServerFacade {
         HttpRequest.Builder requestBuild = buildRequest("PUT", "/game", new JoinGameRquest(authToken, playerColor, gameID));
         requestBuild.setHeader("Authorization", authToken);
         var request = requestBuild.build();
-        sendRequest(request);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     public void observeGame(String authToken, int gameID) throws ResponseException{
-        HttpRequest.Builder requestBuild = buildRequest("PUT", "/game", null);
-        requestBuild.setHeader("Authorization", authToken);
-        var request = requestBuild.build();
-        sendRequest(request);
+        Collection<GameData> games = listGames(authToken);
+        boolean exists = false;
+        for (GameData x: games){
+            if (x.gameID() == gameID){
+                exists = true;
+            }
+        }
+        if (!exists){
+            throw new ResponseException(ResponseException.Code.ClientError, "no game with that ID exists");
+        }
     }
 
     private HttpRequest.Builder buildRequest(String method, String path, Object body) {

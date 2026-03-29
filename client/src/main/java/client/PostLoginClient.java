@@ -39,6 +39,9 @@ public class PostLoginClient {
                 if (tokens[0].equals("joingame") || tokens[0].equals("observegame")){
                     new GameClient(serverURL, tokens[1] ,Integer.parseInt(result), authToken).run();
                 }
+                if (tokens[0].equals("observegame")){
+                    new GameClient(serverURL, "WHITE" ,Integer.parseInt(result), authToken).run();
+                }
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
@@ -123,7 +126,7 @@ public class PostLoginClient {
             try{
                 server.observeGame(authToken, Integer.parseInt(params[0]));
                 System.out.println("You are observing the game");
-                return "";
+                return params[0];
             } catch (ResponseException e) {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
