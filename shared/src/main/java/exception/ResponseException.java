@@ -18,11 +18,11 @@ public class ResponseException extends Exception {
         super(message);
         this.code = code;
     }
-
+    /*
     public String toJson() {
         return new Gson().toJson(Map.of("message", getMessage(), "status", code));
     }
-
+    */
     public static ResponseException fromJson(String json) {
         var map = new Gson().fromJson(json, HashMap.class);
         if (map.get("status") != null) {
@@ -44,11 +44,12 @@ public class ResponseException extends Exception {
             default -> throw new IllegalArgumentException("Unknown HTTP status code: " + httpStatusCode);
         };
     }
-
+    /*
     public int toHttpStatusCode() {
         return switch (code) {
             case ServerError -> 500;
             case ClientError -> 400;
         };
     }
+     */
 }
