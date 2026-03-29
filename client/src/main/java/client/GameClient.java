@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Scanner;
 
-import static ui.EscapeSequences.RESET;
+import static ui.EscapeSequences.*;
 
 public class GameClient {
     private final int gameID;
@@ -57,21 +57,30 @@ public class GameClient {
 
     public String getPieceSymbol(ChessPiece piece){
         if (piece == null){
-            return " ";
+            return EMPTY;
+        }
+        String symbol = "";
+        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+            symbol = switch (piece.getPieceType()) {
+                case KING -> WHITE_KING;
+                case QUEEN -> WHITE_QUEEN;
+                case ROOK -> WHITE_ROOK;
+                case BISHOP -> WHITE_BISHOP;
+                case KNIGHT -> WHITE_KNIGHT;
+                case PAWN -> WHITE_PAWN;
+            };
+        }else {
+             symbol = switch (piece.getPieceType()) {
+                case KING -> BLACK_KING;
+                case QUEEN -> BLACK_QUEEN;
+                case ROOK -> BLACK_ROOK;
+                case BISHOP -> BLACK_BISHOP;
+                case KNIGHT -> BLACK_KNIGHT;
+                case PAWN -> BLACK_PAWN;
+            };
         }
 
-        String symbol = switch (piece.getPieceType()) {
-            case KING -> "k";
-            case QUEEN -> "q";
-            case ROOK -> "r";
-            case BISHOP -> "b";
-            case KNIGHT -> "n";
-            case PAWN -> "p";
-        };
-
-        return piece.getTeamColor() == ChessGame.TeamColor.WHITE
-                ? symbol.toUpperCase()
-                : symbol;
+        return symbol;
     }
 
     public String printBoard(ChessGame game){
@@ -79,6 +88,11 @@ public class GameClient {
         StringBuilder result = new StringBuilder();
         if (Objects.equals(playColor, "black")) {
             for (int x = 1; x <= 8; x++) {
+                result.append(" ");
+                for (int i = 1; i <= 36; i++){
+                    result.append(LONG_DASH);
+                }
+                result.append("\n");
                 for (int y = 1; y <= 8; y++) {
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append("|");
@@ -88,6 +102,11 @@ public class GameClient {
             }
         } else {
             for (int x = 8; x >= 1; x--) {
+                result.append(" ");
+                for (int i = 1; i <= 36; i++){
+                    result.append(LONG_DASH);
+                }
+                result.append("\n");
                 for (int y = 8; y >= 1; y--) {
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append("|");
@@ -96,6 +115,11 @@ public class GameClient {
                 result.append("|\n");
             }
         }
+        result.append(" ");
+        for (int i = 1; i <= 36; i++){
+            result.append(LONG_DASH);
+        }
+        result.append("\n");
         return result.toString();
     }
 
