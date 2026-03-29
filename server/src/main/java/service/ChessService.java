@@ -92,17 +92,17 @@ public class ChessService {
                 throw new DataAccessException("Error: color already taken", 403);
             }
             GameData newGame = new GameData(game.gameID(), game.whiteUsername(), auth.username(), game.gameName(), new ChessGame());
-            gameaccess.deleteGame(game);
-            gameaccess.createGame(newGame);
-            //gameaccess.updateGame(newGame);
+            //gameaccess.deleteGame(game);
+            //gameaccess.createGame(newGame);
+            gameaccess.updateGame(newGame);
         }else{
             if (game.whiteUsername() != null){
                 throw new DataAccessException("Error: color already taken", 403);
             }
             GameData newGame = new GameData(game.gameID(), auth.username(), game.blackUsername(), game.gameName(), new ChessGame());
-            gameaccess.deleteGame(game);
-            gameaccess.createGame(newGame);
-            //gameaccess.updateGame(newGame);
+            //gameaccess.deleteGame(game);
+            //gameaccess.createGame(newGame);
+            gameaccess.updateGame(newGame);
         }
     }
     public void clear() throws DataAccessException{
