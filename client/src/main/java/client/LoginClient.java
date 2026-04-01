@@ -11,6 +11,7 @@ import static ui.EscapeSequences.*;
 public class LoginClient {
     private final ServerFacade server;
     private final String serverURL;
+    private String authToken;
 
     public LoginClient(String serverUrl){
         this.serverURL = serverUrl;
@@ -32,7 +33,7 @@ public class LoginClient {
                 System.out.println(result);
                 String[] tokens = result.split(" ");
                 if (tokens[0].equals("Success")){
-                    new PostLoginClient(serverURL, tokens[tokens.length - 1]).run();
+                    new PostLoginClient(serverURL, authToken).run();
                 }
             } catch (Throwable e) {
                 var msg = e.toString();
@@ -66,7 +67,8 @@ public class LoginClient {
         if (params.length >= 2) {
             try{
                 AuthData results =  server.login(params[0], params[1]);
-                return String.format("Success You signed in as username: %s, authToken: %s", results.username(), results.authToken());
+                authToken = results.authToken();
+                return String.format("Success You signed in as username: %s", results.username());
             } catch (ResponseException e) {
                 throw new ResponseException(e.code(), "username and/or password is incorrect");
             }
@@ -78,7 +80,8 @@ public class LoginClient {
         if (params.length >= 3) {
             try{
                 AuthData result =  server.registration(new UserData(params[0], params[1], params[2]));
-                return String.format("Success You registered as username: %s, authToken: %s", result.username(), result.authToken());
+                authToken = result.authToken();
+                return String.format("Success You registered as username: %s", result.username());
             } catch (ResponseException e) {
                 throw new ResponseException(e.code(), "user already taken");
             }

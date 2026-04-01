@@ -60,7 +60,7 @@ public class GameClient {
             return EMPTY;
         }
         String symbol = "";
-        if (piece.getTeamColor() == ChessGame.TeamColor.WHITE){
+        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK){
             symbol = switch (piece.getPieceType()) {
                 case KING -> WHITE_KING;
                 case QUEEN -> WHITE_QUEEN;
@@ -87,39 +87,51 @@ public class GameClient {
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
         if (Objects.equals(playColor, "black")) {
+            result.append("   " + " h  " + " g " +
+                    " f  " + " e " + "  d " + " c " + "  b " + "  a\n");
             for (int x = 1; x <= 8; x++) {
-                result.append(" ");
-                for (int i = 1; i <= 36; i++){
-                    result.append(LONG_DASH);
-                }
-                result.append("\n");
+                result.append(String.valueOf(x));
                 for (int y = 1; y <= 8; y++) {
+                    if (y%2 == 0 && x%2 == 0) {
+                        result.append(SET_BG_COLOR_LIGHT_GREY);
+                    } else if (y%2 == 1 && x%2 == 1) {
+                        result.append(SET_BG_COLOR_LIGHT_GREY);
+                    } else if (y%2 == 0 && x%2 == 1) {
+                        result.append(SET_BG_COLOR_DARK_GREY);
+                    } else {
+                        result.append(SET_BG_COLOR_DARK_GREY);
+                    }
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
-                    result.append("|");
                     result.append(getPieceSymbol(piece));
                 }
-                result.append("|\n");
+                result.append(RESET_BG_COLOR);
+                result.append("\n");
             }
         } else {
+            result.append("   " + " a  " + " b " +
+                    " c  " + " d " + "  e " + " f " + "  g " + "  h\n");
             for (int x = 8; x >= 1; x--) {
-                result.append(" ");
-                for (int i = 1; i <= 36; i++){
-                    result.append(LONG_DASH);
-                }
-                result.append("\n");
+                result.append(" ")
+                        .append(String.valueOf(x))
+                        .append(" ");
                 for (int y = 8; y >= 1; y--) {
+                    if (y%2 == 0 && x%2 == 0) {
+                        result.append(SET_BG_COLOR_LIGHT_GREY);
+                    } else if (y%2 == 1 && x%2 == 1) {
+                        result.append(SET_BG_COLOR_LIGHT_GREY);
+                    } else if (y%2 == 0 && x%2 == 1) {
+                        result.append(SET_BG_COLOR_DARK_GREY);
+                    } else {
+                        result.append(SET_BG_COLOR_DARK_GREY);
+                    }
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
-                    result.append("|");
                     result.append(getPieceSymbol(piece));
                 }
-                result.append("|\n");
+                result.append(RESET_BG_COLOR);
+                result.append("\n");
             }
         }
         result.append(" ");
-        for (int i = 1; i <= 36; i++){
-            result.append(LONG_DASH);
-        }
-        result.append("\n");
         return result.toString();
     }
 

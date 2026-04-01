@@ -70,7 +70,7 @@ public class PostLoginClient {
     }
 
     public String help(){
-        return "help \n logout \n createGame \n listGames \n playGame \n observeGame \n";
+        return "help \n logout \n createGame \n listGames \n joinGame \n observeGame \n";
     }
 
     public String createGame(String... params) throws ResponseException {
@@ -113,6 +113,8 @@ public class PostLoginClient {
                 return "Success You have joined the game";
             } catch (ResponseException e) {
                 throw new ResponseException(e.code(), "id wrong or player color already taken");
+            } catch (NumberFormatException e){
+                throw new ResponseException(ResponseException.Code.ClientError, "need to give a game ID");
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: teamColor and gameId");
@@ -125,6 +127,8 @@ public class PostLoginClient {
                 return "Success You are observing the game";
             } catch (ResponseException e) {
                 throw new ResponseException(e.code(), "Id not found");
+            } catch (NumberFormatException e){
+                throw new ResponseException(ResponseException.Code.ClientError, "need to give a game ID");
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: gameId");
