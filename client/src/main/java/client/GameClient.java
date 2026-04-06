@@ -8,6 +8,7 @@ import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Scanner;
@@ -19,6 +20,7 @@ public class GameClient {
     private final String playColor;
     private final String authToken;
     private final ServerFacade server;
+    private ChessGame game;
 
     public GameClient(String serverUrl, String playColor , int gameID, String authToken){
         this.gameID = gameID;
@@ -49,11 +51,43 @@ public class GameClient {
         System.out.println();
     }
 
-    public String eval(String line){
-        return line;
+    public String eval(String input){
+        try {
+            String[] tokens = input.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "redraw" -> getBoard();
+                case "makemove" -> makeMove(params);
+                case "showmoves" -> showMoves(params);
+                case "leave" -> leave(params);
+                case "resign" -> resign(params);
+                default -> help();
+            };
+        } catch (ResponseException ex) {
+            return ex.getMessage();
+        }
     }
 
+    public String help(){
+        return "makeMove \n showMoves \n leave \n resign \n";
+    }
 
+    public String makeMove(String... params){
+
+    }
+
+    public String showMoves(String... params){
+
+    }
+
+    public String leave(String... params){
+
+    }
+
+    public String resign(String... params){
+
+    }
 
     public String getPieceSymbol(ChessPiece piece){
         if (piece == null){
@@ -70,7 +104,7 @@ public class GameClient {
                 case PAWN -> WHITE_PAWN;
             };
         }else {
-             symbol = switch (piece.getPieceType()) {
+            symbol = switch (piece.getPieceType()) {
                 case KING -> BLACK_KING;
                 case QUEEN -> BLACK_QUEEN;
                 case ROOK -> BLACK_ROOK;
@@ -83,7 +117,7 @@ public class GameClient {
         return symbol;
     }
 
-    public String printBoard(ChessGame game){
+    public String printBoard(){
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
         if (Objects.equals(playColor, "black")) {
@@ -143,10 +177,7 @@ public class GameClient {
                 currentGame = x;
             }
         }
-        return printBoard(currentGame.game());
-    }
-
-    public String help(){
-        return "";
+        game = currentGame.game();
+        return printBoard();
     }
 }
