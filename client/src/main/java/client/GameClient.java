@@ -1,9 +1,6 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessPiece;
-import chess.ChessPosition;
+import chess.*;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
@@ -21,6 +18,7 @@ public class GameClient {
     private final String authToken;
     private final ServerFacade server;
     private ChessGame game;
+    private Collection<ChessMove> moves;
 
     public GameClient(String serverUrl, String playColor , int gameID, String authToken){
         this.gameID = gameID;
@@ -36,7 +34,7 @@ public class GameClient {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
-            System.out.println(getBoard());
+            System.out.println(printBoard());
             System.out.print("\n" + RESET + ">>> ");
             String line = scanner.nextLine();
 
@@ -57,7 +55,7 @@ public class GameClient {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "redraw" -> getBoard();
+                case "redraw" -> printBoard();
                 case "makemove" -> makeMove(params);
                 case "showmoves" -> showMoves(params);
                 case "leave" -> leave(params);
@@ -73,20 +71,46 @@ public class GameClient {
         return "makeMove \n showMoves \n leave \n resign \n";
     }
 
-    public String makeMove(String... params){
-
+    public String makeMove(String... params) throws ResponseException {
+        getBoard();
+        return null;
     }
 
-    public String showMoves(String... params){
+    public String showMoves(String... params) throws ResponseException {
+        if (params.length >= 2) {
+            try{
+                String pos = params[0];
+                int y = Integer.parseInt(pos.substring(1));
+                int x = 0;
+                switch (pos.substring(0, 1).toLowerCase()){
+                    case "a" -> x=1;
+                    case "b" -> x=2;
+                    case "c" -> x=3;
+                    case "d" -> x=4;
+                    case "e" -> x=5;
+                    case "f" -> x=6;
+                    case "g" -> x=7;
+                    case "h" -> x=8;
+                }
+                System.out.println(x);
+                System.out.println(y);
+                ChessPiece piece = game.getBoard().getPiece(new ChessPosition(y, x));
+                moves = piece.pieceMoves(game.getBoard(), new ChessPosition(y, x));
 
+                return String.format("Your possible moves:\n" + printBoard());
+            } catch (ResponseException e) {
+                throw new ResponseException(e.code(), e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position");
     }
 
     public String leave(String... params){
-
+        return null;
     }
 
     public String resign(String... params){
-
+        return null;
     }
 
     public String getPieceSymbol(ChessPiece piece){
@@ -117,7 +141,8 @@ public class GameClient {
         return symbol;
     }
 
-    public String printBoard(){
+    public String printBoard() throws ResponseException {
+        getBoard();
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
         if (Objects.equals(playColor, "black")) {
@@ -126,14 +151,25 @@ public class GameClient {
             for (int x = 1; x <= 8; x++) {
                 result.append(String.valueOf(x));
                 for (int y = 1; y <= 8; y++) {
-                    if (y%2 == 0 && x%2 == 0) {
-                        result.append(SET_BG_COLOR_LIGHT_GREY);
-                    } else if (y%2 == 1 && x%2 == 1) {
-                        result.append(SET_BG_COLOR_LIGHT_GREY);
-                    } else if (y%2 == 0 && x%2 == 1) {
-                        result.append(SET_BG_COLOR_DARK_GREY);
-                    } else {
-                        result.append(SET_BG_COLOR_DARK_GREY);
+                    boolean move = false;
+                    if (moves != null) {
+                        for (ChessMove m : moves) {
+                            if (m.getEndPosition().equals(new ChessPosition(Math.abs(x-9), y))) {
+                                result.append(SET_BG_COLOR_YELLOW);
+                                move = true;
+                            }
+                        }
+                    }
+                    if (!move) {
+                        if (y % 2 == 0 && x % 2 == 0) {
+                            result.append(SET_BG_COLOR_LIGHT_GREY);
+                        } else if (y % 2 == 1 && x % 2 == 1) {
+                            result.append(SET_BG_COLOR_LIGHT_GREY);
+                        } else if (y % 2 == 0 && x % 2 == 1) {
+                            result.append(SET_BG_COLOR_DARK_GREY);
+                        } else {
+                            result.append(SET_BG_COLOR_DARK_GREY);
+                        }
                     }
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append(getPieceSymbol(piece));
@@ -149,14 +185,25 @@ public class GameClient {
                         .append(String.valueOf(x))
                         .append(" ");
                 for (int y = 8; y >= 1; y--) {
-                    if (y%2 == 0 && x%2 == 0) {
-                        result.append(SET_BG_COLOR_LIGHT_GREY);
-                    } else if (y%2 == 1 && x%2 == 1) {
-                        result.append(SET_BG_COLOR_LIGHT_GREY);
-                    } else if (y%2 == 0 && x%2 == 1) {
-                        result.append(SET_BG_COLOR_DARK_GREY);
-                    } else {
-                        result.append(SET_BG_COLOR_DARK_GREY);
+                    boolean move = false;
+                    if (moves != null) {
+                        for (ChessMove m : moves) {
+                            if (m.getEndPosition().equals(new ChessPosition(Math.abs(x-9), Math.abs(y)))) {
+                                result.append(SET_BG_COLOR_YELLOW);
+                                move = true;
+                            }
+                        }
+                    }
+                    if (!move) {
+                        if (y % 2 == 0 && x % 2 == 0) {
+                            result.append(SET_BG_COLOR_LIGHT_GREY);
+                        } else if (y % 2 == 1 && x % 2 == 1) {
+                            result.append(SET_BG_COLOR_LIGHT_GREY);
+                        } else if (y % 2 == 0 && x % 2 == 1) {
+                            result.append(SET_BG_COLOR_DARK_GREY);
+                        } else {
+                            result.append(SET_BG_COLOR_DARK_GREY);
+                        }
                     }
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append(getPieceSymbol(piece));
@@ -166,10 +213,11 @@ public class GameClient {
             }
         }
         result.append(" ");
+        moves = null;
         return result.toString();
     }
 
-    public String getBoard() throws ResponseException {
+    public void getBoard() throws ResponseException {
         Collection<GameData> games = server.listGames(authToken);
         GameData currentGame = null;
         for(GameData x: games){
@@ -178,6 +226,5 @@ public class GameClient {
             }
         }
         game = currentGame.game();
-        return printBoard();
     }
 }
