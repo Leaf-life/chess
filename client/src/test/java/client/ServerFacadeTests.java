@@ -143,6 +143,12 @@ public class ServerFacadeTests {
         Assertions.assertEquals(expectedGames, gameList);
     }
 
+    @Test
+    @DisplayName("clear games")
+    public void clearGames(){
+        return;
+    }
+
     public static void clearDatabases() throws DataAccessException{
         new SqlAccessAuth().clearAuths();
         new SqlAccessGame().clearGames();

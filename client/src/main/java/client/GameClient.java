@@ -77,30 +77,36 @@ public class GameClient {
     }
 
     public String showMoves(String... params) throws ResponseException {
-        if (params.length >= 2) {
-            try{
+        try {
+            if (params.length >= 1) {
                 String pos = params[0];
                 int y = Integer.parseInt(pos.substring(1));
                 int x = 0;
-                switch (pos.substring(0, 1).toLowerCase()){
-                    case "a" -> x=1;
-                    case "b" -> x=2;
-                    case "c" -> x=3;
-                    case "d" -> x=4;
-                    case "e" -> x=5;
-                    case "f" -> x=6;
-                    case "g" -> x=7;
-                    case "h" -> x=8;
+                switch (pos.substring(0, 1).toLowerCase()) {
+                    case "a" -> x = 1;
+                    case "b" -> x = 2;
+                    case "c" -> x = 3;
+                    case "d" -> x = 4;
+                    case "e" -> x = 5;
+                    case "f" -> x = 6;
+                    case "g" -> x = 7;
+                    case "h" -> x = 8;
                 }
                 System.out.println(x);
                 System.out.println(y);
+                if (Objects.equals(playColor, ChessGame.TeamColor.BLACK.toString())) {
+                    x = Math.abs(x - 9);
+                    y = Math.abs(y - 9);
+                } else {
+                    x = Math.abs(x - 9);
+                }
                 ChessPiece piece = game.getBoard().getPiece(new ChessPosition(y, x));
                 moves = piece.pieceMoves(game.getBoard(), new ChessPosition(y, x));
 
-                return String.format("Your possible moves:\n" + printBoard());
-            } catch (ResponseException e) {
-                throw new ResponseException(e.code(), e.getMessage());
+                return "Your possible moves:\n";
             }
+        } catch (Exception e) {
+            throw new ResponseException(ResponseException.Code.ServerError, "bad input");
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position");
     }
@@ -154,7 +160,7 @@ public class GameClient {
                     boolean move = false;
                     if (moves != null) {
                         for (ChessMove m : moves) {
-                            if (m.getEndPosition().equals(new ChessPosition(Math.abs(x-9), y))) {
+                            if (m.getEndPosition().equals(new ChessPosition(y, x))) {
                                 result.append(SET_BG_COLOR_YELLOW);
                                 move = true;
                             }
@@ -171,7 +177,7 @@ public class GameClient {
                             result.append(SET_BG_COLOR_DARK_GREY);
                         }
                     }
-                    ChessPiece piece = board.getPiece(new ChessPosition(x, y));
+                    ChessPiece piece = board.getPiece(new ChessPosition(y,x));
                     result.append(getPieceSymbol(piece));
                 }
                 result.append(RESET_BG_COLOR);
@@ -188,7 +194,7 @@ public class GameClient {
                     boolean move = false;
                     if (moves != null) {
                         for (ChessMove m : moves) {
-                            if (m.getEndPosition().equals(new ChessPosition(Math.abs(x-9), Math.abs(y)))) {
+                            if (m.getEndPosition().equals(new ChessPosition(x, y))) {
                                 result.append(SET_BG_COLOR_YELLOW);
                                 move = true;
                             }
