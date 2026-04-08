@@ -1,5 +1,7 @@
 package server;
 
+import io.javalin.websocket.WsConnectContext;
+import websocket.*;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
@@ -15,9 +17,11 @@ public class Server {
 
     private final ChessService service;
     private final Javalin javalin;
+    private WebSocketHandler webSocketHandler;
 
     public Server(){
         this(new ChessService(new SqlAccessUser(), new SqlAccessGame(), new SqlAccessAuth()));
+        webSocketHandler = new WebSocketHandler();
     }
 
     public Server(ChessService service) {
@@ -30,6 +34,16 @@ public class Server {
             .post("/game", this::createGame)
             .put("/game", this::joinGame)
             .delete("/db", this::clear)
+            .ws("/ws", ws -> {
+                ws.onConnect(ctx -> {
+                    webSocketHandler.handleConnect(ctx);
+                });
+                ws.onMessage(ctx -> {
+                    //ctx.send("WebSocket response:" + ctx.message());
+                    webSocketHandler.handleMessage(ctx);
+                });
+                ws.onClose(ctx -> webSocketHandler.handleClose(ctx));
+            })
             .exception(DataAccessException.class, this::exceptionHandler);
         // Register your endpoints and exception handlers here.
 
@@ -81,6 +95,10 @@ public class Server {
     private void clear(@NotNull Context context) throws DataAccessException{
         service.clear();
         context.status(200);
+    }
+
+    private void setWebSocketHandler(@NotNull Context context){
+
     }
 
     private void exceptionHandler(DataAccessException e, Context context){

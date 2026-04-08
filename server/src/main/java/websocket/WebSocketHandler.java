@@ -1,4 +1,4 @@
-package server.websocket;
+package websocket;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
@@ -20,20 +20,28 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
 
     @Override
-    public void handleConnect(WsConnectContext ctx) {
+    public void handleConnect(WsConnectContext ctx) throws IOException {
         System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
+        connect(ctx.session);
     }
 
     @Override
     public void handleMessage(WsMessageContext ctx) {
+        int gameId = -1;
+        Session session = ctx.session;
+
         try {
-            UserGameCommand action = new Gson().fromJson(ctx.message(), UserGameCommand.class);
-            switch (action.getCommandType()) {
-                case UserGameCommand.CommandType.CONNECT -> connect(ctx.session);
-                case UserGameCommand.CommandType.MAKE_MOVE -> makeMove(ctx.session);
-                case UserGameCommand.CommandType.LEAVE -> leave(ctx.session);
-                case UserGameCommand.CommandType.RESIGN -> resign(ctx.session);
+            UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+            gameId = command.getGameID();
+            String username = getUsername(command.getAuthToken());
+            saveSession(gameId, session);
+
+            switch (command.getCommandType()) {
+                case UserGameCommand.CommandType.CONNECT -> connect(ctx.session, username, (ConnectCommand) command);
+                case UserGameCommand.CommandType.MAKE_MOVE -> makeMove(ctx.session, username, (MakeMoveCommand) command);
+                case UserGameCommand.CommandType.LEAVE -> leave(ctx.session, username, (LeaveCommand) command);
+                case UserGameCommand.CommandType.RESIGN -> resign(ctx.session, username, (ResignCommand) command);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -45,6 +53,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
+    private String getUsername(String authtoken){
+
+    }
+
+    private void saveSession(int gameID, Session session){
+        connections.add(session);
+    }
+
     private void connect(Session session) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
@@ -53,10 +69,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void makeMove(Session session) throws IOException{
+    private void makeMove(Session session, UserGameCommand action) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         connections.broadcast(session, notification);
 
     }
@@ -64,15 +80,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void leave(Session session) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         connections.broadcast(session, notification);
+        connections.remove(session);
     }
 
     private void resign(Session session) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
         connections.broadcast(session, notification);
+        connections.remove(session);
     }
     /*
 
@@ -93,7 +111,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void makeNoise(String petName, String sound) throws ResponseException {
         try {
             var message = String.format("%s says %s", petName, sound);
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
             connections.broadcast(null, notification);
         } catch (Exception ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());

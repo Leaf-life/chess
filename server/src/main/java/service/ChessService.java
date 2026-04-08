@@ -105,6 +105,11 @@ public class ChessService {
             gameaccess.updateGame(newGame);
         }
     }
+
+    public void makeMove(String authToken, int gameID) throws DataAccessException{
+        checklogin(authToken);
+    }
+
     public void clear() throws DataAccessException{
         gameaccess.clearGames();
         useraccess.clearUsers();

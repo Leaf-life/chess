@@ -1,9 +1,11 @@
 package client;
 
 import chess.*;
+import websocket.*;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,18 +19,26 @@ public class GameClient {
     private final String playColor;
     private final String authToken;
     private final ServerFacade server;
+    private final WebSocketFacade ws;
     private ChessGame game;
     private Collection<ChessMove> moves;
 
-    public GameClient(String serverUrl, String playColor , int gameID, String authToken){
+    public GameClient(String serverUrl, String playColor , int gameID, String authToken) throws ResponseException {
         this.gameID = gameID;
         this.playColor = playColor;
         this.authToken = authToken;
         server = new ServerFacade(serverUrl);
+        ws = new WebSocketFacade(serverUrl, new ServerMessageHandler() {
+            @Override
+            public void notify(ServerMessage notification) {
+
+            }
+        });
     }
 
     public void run() throws ResponseException {
-        System.out.println("Welcome to Chess game. Sign in or register to start playing.");
+        ws.connect(authToken, gameID);
+        System.out.println("Welcome to Chess game: " + gameID);
         System.out.print(help());
 
         Scanner scanner = new Scanner(System.in);
@@ -73,6 +83,7 @@ public class GameClient {
 
     public String makeMove(String... params) throws ResponseException {
         getBoard();
+        ws.makeMove(authToken, gameID);
         return null;
     }
 
