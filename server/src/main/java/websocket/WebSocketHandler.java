@@ -10,6 +10,7 @@ import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.ConnectionManager;
+import websocket.commands.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -23,7 +24,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void handleConnect(WsConnectContext ctx) throws IOException {
         System.out.println("Websocket connected");
         ctx.enableAutomaticPings();
-        connect(ctx.session);
+        //connect(ctx.session);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.add(session);
     }
 
-    private void connect(Session session) throws IOException{
+    private void connect(Session session, String user, ConnectCommand command) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
@@ -69,7 +70,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void makeMove(Session session, UserGameCommand action) throws IOException{
+    private void makeMove(Session session, String user, MakeMoveCommand command) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
@@ -77,7 +78,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
-    private void leave(Session session) throws IOException{
+    private void leave(Session session, String user, LeaveCommand command) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
@@ -85,7 +86,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.remove(session);
     }
 
-    private void resign(Session session) throws IOException{
+    private void resign(Session session, String user, ResignCommand command) throws IOException{
         connections.add(session);
         //var message = String.format("%s is in the shop", visitorName);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
