@@ -5,7 +5,7 @@ import websocket.*;
 import exception.ResponseException;
 import model.GameData;
 import server.ServerFacade;
-import websocket.messages.ServerMessage;
+import websocket.messages.*;
 
 import javax.management.Notification;
 import java.util.Arrays;
@@ -31,12 +31,11 @@ public class GameClient {
         server = new ServerFacade(serverUrl);
         ws = new WebSocketFacade(serverUrl, new ServerMessageHandler() {
             @Override
-            public void notify(ServerMessage notification) {
-                switch (notification.getServerMessageType()){
-                    Object message;
+            public void notify(ServerMessage message) {
+                switch (message.getServerMessageType()){
                     case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
-                    case ERROR -> displayError((ErrorMessage) message).getErrorMessage();
-                    case LOAD_GAME -> loadGame((LoadGameMessage) message).getGame();
+                    case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
+                    case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
                 }
             }
         });
