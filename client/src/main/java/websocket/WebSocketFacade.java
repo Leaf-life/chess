@@ -1,8 +1,13 @@
 package websocket;
 
+import chess.ChessMove;
 import com.google.gson.Gson;
 import exception.ResponseException;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ErrorMessage;
+import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import jakarta.websocket.*;
@@ -31,7 +36,17 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
-                    serverMessage.notify(notification);
+                    switch (notification.getServerMessageType()){
+                        case NOTIFICATION -> serverMessage.notificationMessage(new Gson().fromJson(message, NotificationMessage.class));
+                        case ERROR -> serverMessage.errorMessage(new Gson().fromJson(message, ErrorMessage.class));
+                        case LOAD_GAME -> {
+                            try {
+                                serverMessage.loadGameMessage(new Gson().fromJson(message, LoadGameMessage.class));
+                            } catch (ResponseException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -53,9 +68,9 @@ public class WebSocketFacade extends Endpoint {
         }
     }
 
-    public void makeMove(String authToken, int gameID) throws ResponseException {
+    public void makeMove(String authToken, int gameID, ChessMove move) throws ResponseException {
         try {
-            var action = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID);
+            var action = new MakeMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, gameID, move);
             this.session.getBasicRemote().sendText(new Gson().toJson(action));
         } catch (IOException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());

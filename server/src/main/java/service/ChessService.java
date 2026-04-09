@@ -188,7 +188,7 @@ public class ChessService {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
         ChessGame game = gameData.game();
-        if  (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)){
+        if  (game.isInCheckmate(ChessGame.TeamColor.WHITE) || game.isInCheckmate(ChessGame.TeamColor.BLACK)){
             return true;
         }
         return false;

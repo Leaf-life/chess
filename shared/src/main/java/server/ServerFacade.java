@@ -85,7 +85,15 @@ public class ServerFacade {
             throw new ResponseException(ResponseException.Code.ClientError, "no game with that ID exists");
         }
     }
-
+/*
+    public GameData getGame(String authToken, String playerColor, int gameID) throws ResponseException{
+        HttpRequest.Builder requestBuild = buildRequest("GET", "/game", gameID);
+        requestBuild.setHeader("Authorization", authToken);
+        var request = requestBuild.build();
+        var response = sendRequest(request);
+        return handleResponse(response, GameData.class);
+    }
+*/
     private HttpRequest.Builder buildRequest(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))

@@ -8,20 +8,17 @@ import server.ServerFacade;
 import websocket.messages.*;
 
 import javax.management.Notification;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Scanner;
+import java.util.*;
 
 import static ui.EscapeSequences.*;
 
-public class GameClient {
+public class GameClient implements ServerMessageHandler {
     private final int gameID;
     private final String playColor;
     private final String authToken;
     private final ServerFacade server;
     private final WebSocketFacade ws;
-    private ChessGame game;
+    public ChessGame game;
     private Collection<ChessMove> moves;
 
     public GameClient(String serverUrl, String playColor , int gameID, String authToken) throws ResponseException {
@@ -29,31 +26,11 @@ public class GameClient {
         this.playColor = playColor;
         this.authToken = authToken;
         server = new ServerFacade(serverUrl);
-        ws = new WebSocketFacade(serverUrl, new ServerMessageHandler() {
-            @Override
-            public void notify(ServerMessage message) {
-                switch (message.getServerMessageType()){
-                    case NOTIFICATION -> displayNotification(((NotificationMessage) message).getMessage());
-                    case ERROR -> displayError(((ErrorMessage) message).getErrorMessage());
-                    case LOAD_GAME -> loadGame(((LoadGameMessage) message).getGame());
-                }
-            }
-        });
-    }
-
-    public void displayNotification(String message){
-
-    }
-
-    public void displayError(String message){
-
-    }
-
-    public void loadGame(ChessGame message){
-
+        ws = new WebSocketFacade(serverUrl, this);
     }
 
     public void run() throws ResponseException {
+        getBoard();
         ws.connect(authToken, gameID);
         System.out.println("Welcome to Chess game: " + gameID);
         System.out.print(help());
@@ -82,7 +59,7 @@ public class GameClient {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "redraw" -> printBoard();
+                case "redraw" -> "";
                 case "makemove" -> makeMove(params);
                 case "showmoves" -> showMoves(params);
                 case "leave" -> leave(params);
@@ -98,10 +75,72 @@ public class GameClient {
         return "makeMove \n showMoves \n leave \n resign \n";
     }
 
+    public int posConverter(String pos){
+        int x = -1;
+        switch (pos.substring(0, 1).toLowerCase()) {
+            case "a" -> x = 8;
+            case "b" -> x = 7;
+            case "c" -> x = 6;
+            case "d" -> x = 5;
+            case "e" -> x = 4;
+            case "f" -> x = 3;
+            case "g" -> x = 2;
+            case "h" -> x = 1;
+        }
+        if (Objects.equals(playColor, ChessGame.TeamColor.BLACK.toString())){
+            x = Math.abs(x-9);
+        }
+        return x;
+    }
+
+    public ChessPiece.PieceType getPromotion(String piece){
+        switch (piece){
+            case "pawn" -> {
+                return ChessPiece.PieceType.PAWN;
+            }
+            case "bishop" -> {
+                return ChessPiece.PieceType.BISHOP;
+            }
+            case "rock" -> {
+                return ChessPiece.PieceType.ROOK;
+            }
+            case "knight" -> {
+                return ChessPiece.PieceType.KNIGHT;
+            }
+            case "queen" -> {
+                return ChessPiece.PieceType.QUEEN;
+            }
+            case "king" -> {
+                return ChessPiece.PieceType.KING;
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
     public String makeMove(String... params) throws ResponseException {
-        getBoard();
-        ws.makeMove(authToken, gameID);
-        return null;
+        if (params.length >= 3) {
+            try {
+                //getBoard();
+                String startPos = params[0];
+                String endPos = params[1];
+                String promotion = params[2];
+                int startY = Integer.parseInt(startPos.substring(1));
+                int startX = posConverter(startPos.substring(0, 1).toLowerCase());
+                int endY = Integer.parseInt(endPos.substring(1));
+                int endX = posConverter(endPos.substring(0, 1).toLowerCase());
+                ChessPosition startChessPos = new ChessPosition(startY, startX);
+                ChessPosition endChessPos = new ChessPosition(endY, endX);
+                ChessMove move = new ChessMove(startChessPos, endChessPos, getPromotion(promotion.toLowerCase()));
+                ws.makeMove(authToken, gameID, move);
+                getBoard();
+                return "Move made";
+            } catch (Exception e) {
+                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+            }
+        }
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position, end position, and promotion piece (None is doesnt exists)");
     }
 
     public String showMoves(String... params) throws ResponseException {
@@ -109,25 +148,7 @@ public class GameClient {
             if (params.length >= 1) {
                 String pos = params[0];
                 int y = Integer.parseInt(pos.substring(1));
-                int x = 0;
-                switch (pos.substring(0, 1).toLowerCase()) {
-                    case "a" -> x = 1;
-                    case "b" -> x = 2;
-                    case "c" -> x = 3;
-                    case "d" -> x = 4;
-                    case "e" -> x = 5;
-                    case "f" -> x = 6;
-                    case "g" -> x = 7;
-                    case "h" -> x = 8;
-                }
-                System.out.println(x);
-                System.out.println(y);
-                if (Objects.equals(playColor, ChessGame.TeamColor.BLACK.toString())) {
-                    x = Math.abs(x - 9);
-                    y = Math.abs(y - 9);
-                } else {
-                    x = Math.abs(x - 9);
-                }
+                int x = posConverter(pos.substring(0,1));
                 ChessPiece piece = game.getBoard().getPiece(new ChessPosition(y, x));
                 moves = piece.pieceMoves(game.getBoard(), new ChessPosition(y, x));
 
@@ -139,12 +160,14 @@ public class GameClient {
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position");
     }
 
-    public String leave(String... params){
-        return null;
+    public String leave(String... params) throws ResponseException {
+        ws.leave(authToken, gameID);
+        return "quit";
     }
 
-    public String resign(String... params){
-        return null;
+    public String resign(String... params) throws ResponseException {
+        ws.resign(authToken, gameID);
+        return "You have resigned";
     }
 
     public String getPieceSymbol(ChessPiece piece){
@@ -176,11 +199,11 @@ public class GameClient {
     }
 
     public String printBoard() throws ResponseException {
-        getBoard();
+        //getBoard();
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
         if (Objects.equals(playColor, "black")) {
-            result.append("   " + " h  " + " g " +
+            result.append(" " + " h  " + " g " +
                     " f  " + " e " + "  d " + " c " + "  b " + "  a\n");
             for (int x = 1; x <= 8; x++) {
                 result.append(String.valueOf(x));
@@ -188,7 +211,7 @@ public class GameClient {
                     boolean move = false;
                     if (moves != null) {
                         for (ChessMove m : moves) {
-                            if (m.getEndPosition().equals(new ChessPosition(y, x))) {
+                            if (m.getEndPosition().equals(new ChessPosition(x, y))) {
                                 result.append(SET_BG_COLOR_YELLOW);
                                 move = true;
                             }
@@ -205,7 +228,7 @@ public class GameClient {
                             result.append(SET_BG_COLOR_DARK_GREY);
                         }
                     }
-                    ChessPiece piece = board.getPiece(new ChessPosition(y,x));
+                    ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append(getPieceSymbol(piece));
                 }
                 result.append(RESET_BG_COLOR);
@@ -260,5 +283,22 @@ public class GameClient {
             }
         }
         game = currentGame.game();
+    }
+
+    @Override
+    public void notificationMessage(NotificationMessage notification) {
+        System.out.println(notification.getMessage());
+    }
+
+    @Override
+    public void errorMessage(ErrorMessage notification) {
+        System.out.println(notification.getErrorMessage());
+    }
+
+    @Override
+    public void loadGameMessage(LoadGameMessage notification) throws ResponseException {
+        System.out.println("load game message");
+        game = notification.getGame();
+        printBoard();
     }
 }

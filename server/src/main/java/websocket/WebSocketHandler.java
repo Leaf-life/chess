@@ -112,9 +112,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
         try {
             if(!service.checkResigned(makeMoveCommand.getAuthToken(), gameID)) {
-                ChessGame game = service.getGame(makeMoveCommand.getAuthToken(), gameID);
                 service.checkMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
                 service.makeMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
+                ChessGame game = service.getGame(makeMoveCommand.getAuthToken(), gameID);
                 boolean isCheckMate = service.isCheckMate(makeMoveCommand.getAuthToken(), gameID);
                 var message = String.format("Player: %s made move", username);
                 var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
