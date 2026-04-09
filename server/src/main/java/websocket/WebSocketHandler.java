@@ -1,6 +1,7 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import exception.ResponseException;
@@ -29,7 +30,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
     private final Server server;
     ChessService service;
-    private boolean resigned = false;
+    private boolean observer = false;
 
     public WebSocketHandler(ChessService service, Server server) {
         this.service = service;
@@ -53,6 +54,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = getUsername(command.getAuthToken());
             service.checklogin(command.getAuthToken());
             service.checkGameID(command.getAuthToken(),gameId);
+            service.isObserver(command.getAuthToken(), gameId);
             saveSession(gameId, session);
 
             switch (command.getCommandType()) {
@@ -74,9 +76,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         System.out.println("Websocket closed");
     }
 
-    private String getUsername(String authToken){
+    private String getUsername(String authToken) throws DataAccessException {
+        return service.getUsername(authToken);
+    }
 
-        return "";
+    private boolean isObserver(String authtoken, int gameID) throws DataAccessException {
+        return service.isObserver(authtoken, gameID);
     }
 
     private ChessGame getGame(Session session, String authToken, int gameID) throws IOException {
@@ -88,69 +93,73 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void saveSession(int gameID, Session session){
-        connections.add(session);
+        connections.add(gameID, session);
     }
 
-    private void connect(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
-        ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
-        ChessGame game = getGame(session, authTocken, gameID);
-        var message = String.format("Player has joined");
-        var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
-        var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(session, notificationMessage, message);
-        connections.send(session, loadGameMessage, message);
+    private void connect(Session session, String username, WsMessageContext ctx, int gameID) throws IOException, DataAccessException {
+         if (!observer) {
+             ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
+             var message = String.format("Player: %s has joined", username);
+             var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, service.getGame(command.getAuthToken(), gameID));
+             var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+             connections.broadcast(gameID, session, notificationMessage, message);
+             connections.send(session, loadGameMessage, message);
+         }
 
     }
 
-    private void checkResigned() throws DataAccessException {
-        if (resigned){
-            throw new DataAccessException("Error: you have resigned", 400);
-        }
-    }
-
-    private void makeMove(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
+    private void makeMove(Session session, String username, WsMessageContext ctx, int gameID) throws IOException{
         MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
         try {
             if(!service.checkResigned(makeMoveCommand.getAuthToken(), gameID)) {
+                ChessGame game = service.getGame(makeMoveCommand.getAuthToken(), gameID);
                 service.checkMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
-                var message = String.format("Player made move");
-                var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
+                service.makeMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
+                boolean isCheckMate = service.isCheckMate(makeMoveCommand.getAuthToken(), gameID);
+                var message = String.format("Player: %s made move", username);
+                var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
                 var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-                connections.broadcast(session, loadGameMessage, message);
-                connections.broadcast(session, notificationMessage, message);
+                connections.broadcast(gameID, session, loadGameMessage, message);
+                connections.broadcast(gameID, session, notificationMessage, message);
                 connections.send(session, loadGameMessage, message);
+                if (isCheckMate){
+                    message = String.format("Finish");
+                    notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                    connections.send(session, notificationMessage, message);
+                    connections.broadcast(gameID, session, notificationMessage, message);
+                }
             }else {
-                var message = String.format("you resigned");
+                var message = String.format("%s resigned", username);
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
                 connections.send(session, errorMessage, message);
             }
-        } catch (DataAccessException e) {
+        } catch (DataAccessException | InvalidMoveException e) {
             var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             connections.send(session, notification, e.getMessage());
         }
     }
 
-    private void leave(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException, DataAccessException {
-        LeaveCommand leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
-        var message = String.format("Player has left");
-        var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        service.leaveGame(leaveCommand.getAuthToken(), gameID);
-        connections.broadcast(session, notification, message);
-        connections.remove(session);
+    private void leave(Session session, String username, WsMessageContext ctx, int gameID) throws IOException, DataAccessException {
+            LeaveCommand leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
+            var message = String.format("Player: %s has left the game", username);
+            var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+            service.leaveGame(leaveCommand.getAuthToken(), gameID);
+            connections.broadcast(gameID, session, notification, message);
+            connections.remove(gameID, session);
     }
 
-    private void resign(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
-        var message = String.format("Player has resigned");
+    private void resign(Session session, String username, WsMessageContext ctx, int gameID) throws IOException{
+        var message = String.format("Player: %s has resigned", username);
        ResignCommand resignCommand = new Gson().fromJson(ctx.message(), ResignCommand.class);
         try {
             if (!service.checkResigned(resignCommand.getAuthToken(), gameID)) {
                 service.setResigned(resignCommand.getAuthToken(), gameID);
                 var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
                 service.checkPlayer(resignCommand.getAuthToken(), gameID);
-                connections.broadcast(session, notification, message);
+                connections.broadcast(gameID, session, notification, message);
                 connections.send(session, notification, message);
             } else {
-                message = String.format("you resigned");
+                message = String.format("%s resigned", username);
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
                 connections.send(session, errorMessage, message);
             }
@@ -159,14 +168,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.send(session, notification, e.getMessage());
         }
     }
-
+    /*
     public void makeNoise(String petName, String sound) throws ResponseException {
         try {
             var message = String.format("%s says %s", petName, sound);
             var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            connections.broadcast(null, notification, message);
+            connections.broadcast( notification, message);
         } catch (Exception ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
+     */
 }

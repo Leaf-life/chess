@@ -8,17 +8,21 @@ import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
-    public final ConcurrentHashMap<Session, Session> connections = new ConcurrentHashMap<>();
+    public final Map<Integer, HashSet<Session>> connections = new HashMap<>();
 
-    public void add(Session session) {
-        connections.put(session, session);
+    public void add(int gameID, Session session) {
+        if (!connections.containsKey(gameID)){
+            connections.put(gameID, new HashSet<>());
+        }
+        connections.get(gameID).add(session);
     }
 
-    public void remove(Session session) {
-        connections.remove(session);
+    public void remove(int gameID, Session session) {
+        connections.get(gameID).remove(session);
     }
 
     public void send(Session session, ServerMessage notification, String message) throws IOException {
@@ -27,10 +31,10 @@ public class ConnectionManager {
         session.getRemote().sendString(msg);
     }
 
-    public void broadcast(Session excludeSession, ServerMessage notification, String message) throws IOException {
+    public void broadcast(int gameID, Session excludeSession, ServerMessage notification, String message) throws IOException {
         Gson gson = new Gson();
         String msg = gson.toJson(notification);
-        for (Session c : connections.values()) {
+        for (Session c : connections.get(gameID)) {
             if (c.isOpen()) {
                 if(!c.equals(excludeSession)) {
                     c.getRemote().sendString(msg);

@@ -3,6 +3,7 @@ package service;
 import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
+import chess.InvalidMoveException;
 import dataaccess.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -108,8 +109,26 @@ public class ChessService {
         }
     }
 
-    public void makeMove(String authToken, int gameID) throws DataAccessException{
+    public boolean isObserver(String authToken, int gameID) throws DataAccessException {
         checklogin(authToken);
+        String username = authaccess.getAuth(authToken).username();
+        GameData gameData = gameaccess.getGame(gameID);
+        if (gameData.whiteUsername() != null){
+            if (gameData.whiteUsername().equals(username)){
+                return false;
+            }
+        }
+        if (gameData.blackUsername() != null) {
+            if (gameData.blackUsername().equals(username)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public String getUsername(String authToken) throws DataAccessException{
+        checklogin(authToken);
+        return authaccess.getAuth(authToken).username();
     }
 
     public ChessGame getGame(String authToken, int gameID) throws DataAccessException{
@@ -152,6 +171,29 @@ public class ChessService {
         throw new DataAccessException("Error: invalid move", 400);
     }
 
+    public void makeMove(String authToken, int gameID, ChessMove move) throws DataAccessException, InvalidMoveException {
+        try {
+            checklogin(authToken);
+            GameData gameData = gameaccess.getGame(gameID);
+            AuthData authData = authaccess.getAuth(authToken);
+            ChessGame game = gameData.game();
+            game.makeMove(move);
+            gameaccess.updateGame(new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game));
+        } catch (Exception e){
+            throw new InvalidMoveException("bad Move");
+        }
+    }
+
+    public boolean isCheckMate(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        if  (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)){
+            return true;
+        }
+        return false;
+    }
+
     public void checkPlayer(String authToken, int gameID) throws DataAccessException {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
@@ -165,6 +207,9 @@ public class ChessService {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
         AuthData authData = authaccess.getAuth(authToken);
+        if (gameData.whiteUsername() == null || gameData.blackUsername() == null){
+            return;
+        }
         if (gameData.whiteUsername().equals(authData.username())){
             gameaccess.updateGame(new GameData(gameID, null, gameData.blackUsername(), gameData.gameName(), gameData.game()));
         } else {
