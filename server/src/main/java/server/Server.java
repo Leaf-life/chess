@@ -96,7 +96,7 @@ public class Server {
         context.status(200);
     }
 
-    public ChessGame getGame(String authToken, int gameID) throws DataAccessException {
+    public GameData getGame(String authToken, int gameID) throws DataAccessException {
         return service.getGame(authToken, gameID);
     }
 

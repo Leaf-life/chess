@@ -131,9 +131,9 @@ public class ChessService {
         return authaccess.getAuth(authToken).username();
     }
 
-    public ChessGame getGame(String authToken, int gameID) throws DataAccessException{
+    public GameData getGame(String authToken, int gameID) throws DataAccessException{
         checklogin(authToken);
-        return gameaccess.getGame(gameID).game();
+        return gameaccess.getGame(gameID);
     }
 
     public void checkGameID(String authToken, int gameID) throws DataAccessException {
@@ -150,19 +150,24 @@ public class ChessService {
         AuthData authData = authaccess.getAuth(authToken);
         ChessGame game = gameData.game();
         ChessPiece piece = game.getBoard().getPiece(move.getStartPosition());
-        ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
-        ChessGame.TeamColor oppisteColor = ChessGame.TeamColor.WHITE;
+        ChessGame.TeamColor color = null;
         if (gameData.whiteUsername() == null || gameData.blackUsername() == null){
             throw new DataAccessException("Needs other player before game can start", 400);
         }
         if (gameData.whiteUsername().equals(authData.username())){
             color = ChessGame.TeamColor.WHITE;
-            oppisteColor = ChessGame.TeamColor.BLACK;
+        } else if (gameData.blackUsername().equals(authData.username())) {
+            color = ChessGame.TeamColor.BLACK;
+        } else{
+            throw new DataAccessException("You are an observer you are not allowed to move pieces", 400);
         }
         if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)){
             return;
         }
-        if (!piece.getTeamColor().equals(color) || game.getTeamTurn() != color){
+        if (!piece.getTeamColor().equals(color)){
+            throw new DataAccessException("Error: not your piece", 400);
+        }
+        if (game.getTeamTurn() != color){
             throw new DataAccessException("Error: moved out of turn", 400);
         }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(game.getBoard(), move.getStartPosition());
@@ -197,6 +202,16 @@ public class ChessService {
         return false;
     }
 
+    public boolean isCheck(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        if  (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)){
+            return true;
+        }
+        return false;
+    }
+
     public void checkPlayer(String authToken, int gameID) throws DataAccessException {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
@@ -215,7 +230,7 @@ public class ChessService {
         }
         if (gameData.whiteUsername().equals(authData.username())){
             gameaccess.updateGame(new GameData(gameID, null, gameData.blackUsername(), gameData.gameName(), gameData.game()));
-        } else {
+        } else if (gameData.blackUsername().equals(authData.username())) {
             gameaccess.updateGame(new GameData(gameID, gameData.blackUsername(), null, gameData.gameName(), gameData.game()));
         }
     }

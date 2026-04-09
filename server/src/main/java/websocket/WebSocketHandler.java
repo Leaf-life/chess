@@ -11,6 +11,7 @@ import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsConnectHandler;
 import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.ConnectionManager;
 import websocket.commands.*;
@@ -84,14 +85,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         return service.isObserver(authtoken, gameID);
     }
 
-    private ChessGame getGame(Session session, String authToken, int gameID) throws IOException {
-        try{
-            return server.getGame(authToken, gameID);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private void saveSession(int gameID, Session session){
         connections.add(gameID, session);
     }
@@ -100,7 +93,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
          if (!observer) {
              ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
              var message = String.format("Player: %s has joined", username);
-             var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, service.getGame(command.getAuthToken(), gameID));
+             var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, service.getGame(command.getAuthToken(), gameID).game());
              var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
              connections.broadcast(gameID, session, notificationMessage, message);
              connections.send(session, loadGameMessage, message);
@@ -114,16 +107,29 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             if(!service.checkResigned(makeMoveCommand.getAuthToken(), gameID)) {
                 service.checkMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
                 service.makeMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
-                ChessGame game = service.getGame(makeMoveCommand.getAuthToken(), gameID);
+                GameData gameData = service.getGame(makeMoveCommand.getAuthToken(), gameID);
+                ChessGame game = gameData.game();
                 boolean isCheckMate = service.isCheckMate(makeMoveCommand.getAuthToken(), gameID);
-                var message = String.format("Player: %s made move", username);
+                String message = String.format("Player: %s made move %s", username, makeMoveCommand.getMove().toString());
+                if (service.isCheck(makeMoveCommand.getAuthToken(), gameID)){
+                    String checkUser = username;
+                    if (checkUser.equals(gameData.whiteUsername())){
+                        checkUser = gameData.blackUsername();
+                    } else{
+                        checkUser = gameData.whiteUsername();
+                    }
+                    message = message + String.format("\n %s is in check", checkUser);
+                }
                 var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
                 var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
                 connections.broadcast(gameID, session, loadGameMessage, message);
                 connections.broadcast(gameID, session, notificationMessage, message);
                 connections.send(session, loadGameMessage, message);
+                //if (service.isCheck(makeMoveCommand.getAuthToken(), gameID)){
+                //    connections.send(session, notificationMessage, message);
+                //}
                 if (isCheckMate){
-                    message = String.format("Finish");
+                    message = String.format("checkMate");
                     notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
                     connections.send(session, notificationMessage, message);
                     connections.broadcast(gameID, session, notificationMessage, message);

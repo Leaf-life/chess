@@ -166,6 +166,17 @@ public class GameClient implements ServerMessageHandler {
     }
 
     public String resign(String... params) throws ResponseException {
+        boolean resignedCheck = true;
+        while (resignedCheck){
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("\n are you sure (y/n)");
+            String line = scanner.nextLine();
+            if (line.equals("y")){
+                resignedCheck = false;
+            } else{
+                return "cancled resigned";
+            }
+        }
         ws.resign(authToken, gameID);
         return "You have resigned";
     }

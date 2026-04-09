@@ -47,4 +47,20 @@ public class ChessPosition {
     public int getColumn() {
         return col;
     }
+
+    @Override
+    public String toString(){
+        String column = "";
+        switch (col){
+            case 1 -> column = "h";
+            case 2 -> column = "g";
+            case 3 -> column = "f";
+            case 4 -> column = "e";
+            case 5 -> column = "d";
+            case 6 -> column = "c";
+            case 7 -> column = "b";
+            case 8 -> column = "a";
+        }
+        return column + String.valueOf(row);
+    }
 }
