@@ -121,8 +121,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.send(session, loadGameMessage, message);
             }else {
                 var message = String.format("you resigned");
-                var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-                connections.send(session, notificationMessage, message);
+                var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
+                connections.send(session, errorMessage, message);
             }
         } catch (DataAccessException e) {
             var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
@@ -130,9 +130,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    private void leave(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
+    private void leave(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException, DataAccessException {
+        LeaveCommand leaveCommand = new Gson().fromJson(ctx.message(), LeaveCommand.class);
         var message = String.format("Player has left");
         var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        service.leaveGame(leaveCommand.getAuthToken(), gameID);
         connections.broadcast(session, notification, message);
         connections.remove(session);
     }
@@ -149,10 +151,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.send(session, notification, message);
             } else {
                 message = String.format("you resigned");
-                var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-                connections.send(session, notificationMessage, message);
+                var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
+                connections.send(session, errorMessage, message);
             }
-            //connections.remove(session);
         } catch (DataAccessException e) {
             var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             connections.send(session, notification, e.getMessage());

@@ -137,7 +137,7 @@ public class ChessService {
             color = ChessGame.TeamColor.WHITE;
             oppisteColor = ChessGame.TeamColor.BLACK;
         }
-        if (game.isInCheck(color) || game.isInCheck(oppisteColor)){
+        if (game.isInCheck(ChessGame.TeamColor.WHITE) || game.isInCheck(ChessGame.TeamColor.BLACK)){
             return;
         }
         if (!piece.getTeamColor().equals(color) || game.getTeamTurn() != color){
@@ -161,6 +161,17 @@ public class ChessService {
         }
     }
 
+    public void leaveGame(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        AuthData authData = authaccess.getAuth(authToken);
+        if (gameData.whiteUsername().equals(authData.username())){
+            gameaccess.updateGame(new GameData(gameID, null, gameData.blackUsername(), gameData.gameName(), gameData.game()));
+        } else {
+            gameaccess.updateGame(new GameData(gameID, gameData.blackUsername(), null, gameData.gameName(), gameData.game()));
+        }
+    }
+
     public boolean checkResigned(String authToken, int gameID) throws DataAccessException {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
@@ -173,6 +184,7 @@ public class ChessService {
         GameData gameData = gameaccess.getGame(gameID);
         ChessGame game = gameData.game();
         game.setResigned();
+        gameaccess.updateGame(new GameData(gameID, gameData.whiteUsername(), gameData.blackUsername(), gameData.gameName(), game));
     }
 
     public void clear() throws DataAccessException{
