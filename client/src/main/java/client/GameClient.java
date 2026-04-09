@@ -30,7 +30,7 @@ public class GameClient implements ServerMessageHandler {
     }
 
     public void run() throws ResponseException {
-        getBoard();
+        //getBoard();
         ws.connect(authToken, gameID);
         System.out.println("Welcome to Chess game: " + gameID);
         System.out.print(help());
@@ -38,7 +38,7 @@ public class GameClient implements ServerMessageHandler {
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("quit")) {
-            System.out.println(printBoard());
+            //System.out.println(printBoard());
             System.out.print("\n" + RESET + ">>> ");
             String line = scanner.nextLine();
 
@@ -59,7 +59,7 @@ public class GameClient implements ServerMessageHandler {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "redraw" -> "";
+                case "redraw" -> printBoard();
                 case "makemove" -> makeMove(params);
                 case "showmoves" -> showMoves(params);
                 case "leave" -> leave(params);
@@ -152,7 +152,7 @@ public class GameClient implements ServerMessageHandler {
                 ChessPiece piece = game.getBoard().getPiece(new ChessPosition(y, x));
                 moves = piece.pieceMoves(game.getBoard(), new ChessPosition(y, x));
 
-                return "Your possible moves:\n";
+                return "Your possible moves:\n" + printBoard();
             }
         } catch (Exception e) {
             throw new ResponseException(ResponseException.Code.ServerError, "bad input");
@@ -297,8 +297,7 @@ public class GameClient implements ServerMessageHandler {
 
     @Override
     public void loadGameMessage(LoadGameMessage notification) throws ResponseException {
-        System.out.println("load game message");
         game = notification.getGame();
-        printBoard();
+        System.out.println("\n" + printBoard());
     }
 }

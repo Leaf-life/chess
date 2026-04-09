@@ -152,6 +152,9 @@ public class ChessService {
         ChessPiece piece = game.getBoard().getPiece(move.getStartPosition());
         ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
         ChessGame.TeamColor oppisteColor = ChessGame.TeamColor.WHITE;
+        if (gameData.whiteUsername() == null || gameData.blackUsername() == null){
+            throw new DataAccessException("Needs other player before game can start", 400);
+        }
         if (gameData.whiteUsername().equals(authData.username())){
             color = ChessGame.TeamColor.WHITE;
             oppisteColor = ChessGame.TeamColor.BLACK;
