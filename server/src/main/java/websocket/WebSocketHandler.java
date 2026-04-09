@@ -16,6 +16,7 @@ import websocket.commands.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
+import websocket.messages.NotificationMessage;
 import websocket.messages.ServerMessage;
 
 import service.ChessService;
@@ -41,7 +42,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) {
+    public void handleMessage(WsMessageContext ctx) throws IOException {
         int gameId = -1;
         Session session = ctx.session;
 
@@ -49,16 +50,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand command = new Gson().fromJson(ctx.message(), UserGameCommand.class);
             gameId = command.getGameID();
             String username = getUsername(command.getAuthToken());
+            service.checklogin(command.getAuthToken());
+            service.checkGameID(command.getAuthToken(),gameId);
             saveSession(gameId, session);
 
             switch (command.getCommandType()) {
                 case UserGameCommand.CommandType.CONNECT -> connect(ctx.session, username, ctx, gameId);
-                case UserGameCommand.CommandType.MAKE_MOVE -> makeMove(ctx.session, username, (MakeMoveCommand) command);
-                case UserGameCommand.CommandType.LEAVE -> leave(ctx.session, username, (LeaveCommand) command);
-                case UserGameCommand.CommandType.RESIGN -> resign(ctx.session, username, (ResignCommand) command);
+                case UserGameCommand.CommandType.MAKE_MOVE -> makeMove(ctx.session, username, ctx, gameId);
+                case UserGameCommand.CommandType.LEAVE -> leave(ctx.session, username, ctx, gameId);
+                case UserGameCommand.CommandType.RESIGN -> resign(ctx.session, username, ctx, gameId);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (DataAccessException e) {
+            var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
+            connections.send(session, notification, e.getMessage());
         }
     }
 
@@ -87,6 +93,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
         ChessGame game = getGame(session, authTocken, gameID);
+        /*
         if (game == null){
             String message = "bad game ID";
             var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
@@ -97,26 +104,33 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
             connections.broadcast(session, notification, message);
         }
+         */
+        var message = String.format("Player has joined");
+        var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
+        var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(session, notificationMessage, message);
+        connections.send(session, loadGameMessage, message);
 
     }
 
-    private void makeMove(Session session, String authTocken, MakeMoveCommand command) throws IOException{
+    private void makeMove(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         var message = String.format("Player made move");
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
         connections.broadcast(session, notification, message);
+        connections.send(session, notification, message);
 
     }
 
-    private void leave(Session session, String authTocken, LeaveCommand command) throws IOException{
+    private void leave(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         var message = String.format("Player has left");
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
-        connections.broadcast(session, notification, message);
+        //var notification = new NotificationMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
+        //connections.broadcast(session, notification, message);
         connections.remove(session);
     }
 
-    private void resign(Session session, String authTocken, ResignCommand command) throws IOException{
+    private void resign(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         var message = String.format("Player has resigned");
-        var notification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME);
+        var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         connections.broadcast(session, notification, message);
         connections.remove(session);
     }

@@ -21,17 +21,18 @@ public class ConnectionManager {
         connections.remove(session);
     }
 
+    public void send(Session session, ServerMessage notification, String message) throws IOException {
+        Gson gson = new Gson();
+        String msg = gson.toJson(notification);
+        session.getRemote().sendString(msg);
+    }
+
     public void broadcast(Session excludeSession, ServerMessage notification, String message) throws IOException {
         Gson gson = new Gson();
         String msg = gson.toJson(notification);
         for (Session c : connections.values()) {
             if (c.isOpen()) {
-                if (!c.equals(excludeSession)) {
-                    if (!(notification.getServerMessageType() == ServerMessage.ServerMessageType.ERROR)) {
-                        String msg2 = gson.toJson(new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message));
-                        c.getRemote().sendString(msg2);
-                    }
-                } else {
+                if(!c.equals(excludeSession)) {
                     c.getRemote().sendString(msg);
                 }
             }

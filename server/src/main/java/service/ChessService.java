@@ -21,7 +21,7 @@ public class ChessService {
         this.authaccess = authaccess;
     }
 
-    private void checklogin(String authtoken) throws DataAccessException{
+    public void checklogin(String authtoken) throws DataAccessException{
         AuthData auth = authaccess.getAuth(authtoken);
         if (auth == null){
             throw new DataAccessException("Error: No Session Found", 401);
@@ -115,14 +115,12 @@ public class ChessService {
         return gameaccess.getGame(gameID).game();
     }
 
-    public boolean checkGameID(String authToken, int gameID){
-        try{
-            gameaccess.getGame(gameID);
-            return true;
-        } catch (Exception e){
-            return false;
+    public void checkGameID(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData game = gameaccess.getGame(gameID);
+        if (game == null){
+            throw new DataAccessException("Error: No Game Found", 401);
         }
-
     }
 
     public void clear() throws DataAccessException{
