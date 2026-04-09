@@ -93,18 +93,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void connect(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
         ChessGame game = getGame(session, authTocken, gameID);
-        /*
-        if (game == null){
-            String message = "bad game ID";
-            var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
-            connections.broadcast(session, notification, message);
-        }
-        else {
-            var message = String.format("Player has joined");
-            var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
-            connections.broadcast(session, notification, message);
-        }
-         */
         var message = String.format("Player has joined");
         var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
         var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
@@ -114,11 +102,17 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
-        var message = String.format("Player made move");
-        var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
-        connections.broadcast(session, notification, message);
-        connections.send(session, notification, message);
-
+        MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
+        try {
+            service.checkMove(authTocken, gameID, makeMoveCommand.getMove());
+            var message = String.format("Player made move");
+            var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
+            connections.broadcast(session, notification, message);
+            connections.send(session, notification, message);
+        } catch (DataAccessException e) {
+            var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
+            connections.send(session, notification, e.getMessage());
+        }
     }
 
     private void leave(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{

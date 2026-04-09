@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import dataaccess.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -121,6 +123,20 @@ public class ChessService {
         if (game == null){
             throw new DataAccessException("Error: No Game Found", 401);
         }
+    }
+
+    public void checkMove(String authToken, int gameID, ChessMove move) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        ChessPiece piece = game.getBoard().getPiece(move.getStartPosition());
+        Collection<ChessMove> possibleMoves = piece.pieceMoves(game.getBoard(), move.getStartPosition());
+        for (ChessMove m: possibleMoves){
+            if (m.equals(move)){
+                return;
+            }
+        }
+        throw new DataAccessException("Error: invalid move", 400);
     }
 
     public void clear() throws DataAccessException{
