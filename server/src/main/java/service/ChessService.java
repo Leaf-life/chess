@@ -110,6 +110,21 @@ public class ChessService {
         checklogin(authToken);
     }
 
+    public ChessGame getGame(String authToken, int gameID) throws DataAccessException{
+        checklogin(authToken);
+        return gameaccess.getGame(gameID).game();
+    }
+
+    public boolean checkGameID(String authToken, int gameID){
+        try{
+            gameaccess.getGame(gameID);
+            return true;
+        } catch (Exception e){
+            return false;
+        }
+
+    }
+
     public void clear() throws DataAccessException{
         gameaccess.clearGames();
         useraccess.clearUsers();

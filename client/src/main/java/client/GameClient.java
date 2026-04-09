@@ -41,15 +41,15 @@ public class GameClient {
         });
     }
 
-    public void displayNotification(NotificationMessage message){
+    public void displayNotification(String message){
 
     }
 
-    public void displayError(ErrorMessage message){
+    public void displayError(String message){
 
     }
 
-    public void loadGame(LoadGameMessage message){
+    public void loadGame(ChessGame message){
 
     }
 

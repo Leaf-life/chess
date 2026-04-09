@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import io.javalin.websocket.WsConnectContext;
 import io.javalin.websocket.WsMessageContext;
 import websocket.*;
@@ -18,15 +19,17 @@ public class Server {
 
     private final ChessService service;
     private final Javalin javalin;
-    private WebSocketHandler webSocketHandler;
+    private final WebSocketHandler webSocketHandler;
 
     public Server(){
         this(new ChessService(new SqlAccessUser(), new SqlAccessGame(), new SqlAccessAuth()));
-        webSocketHandler = new WebSocketHandler();
     }
 
     public Server(ChessService service) {
         this.service = service;
+
+        webSocketHandler = new WebSocketHandler(service, this);
+
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
             .post("/user", this::registration)
             .post("/session", this::login)
@@ -36,14 +39,9 @@ public class Server {
             .put("/game", this::joinGame)
             .delete("/db", this::clear)
             .ws("/ws", ws -> {
-                ws.onConnect(ctx -> {
-                    webSocketHandler.handleConnect(ctx);
-                });
-                ws.onMessage(ctx -> {
-                    //ctx.send("WebSocket response:" + ctx.message());
-                    webSocketHandler.handleMessage(ctx);
-                });
-                ws.onClose(ctx -> webSocketHandler.handleClose(ctx));
+                ws.onConnect(webSocketHandler);
+                ws.onMessage(webSocketHandler);
+                ws.onClose(webSocketHandler);
             })
             .exception(DataAccessException.class, this::exceptionHandler);
         // Register your endpoints and exception handlers here.
@@ -98,8 +96,8 @@ public class Server {
         context.status(200);
     }
 
-    private void setWebSocketHandler(@NotNull Context context){
-
+    public ChessGame getGame(String authToken, int gameID) throws DataAccessException {
+        return service.getGame(authToken, gameID);
     }
 
     private void exceptionHandler(DataAccessException e, Context context){
