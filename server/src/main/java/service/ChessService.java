@@ -128,8 +128,21 @@ public class ChessService {
     public void checkMove(String authToken, int gameID, ChessMove move) throws DataAccessException {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
+        AuthData authData = authaccess.getAuth(authToken);
         ChessGame game = gameData.game();
         ChessPiece piece = game.getBoard().getPiece(move.getStartPosition());
+        ChessGame.TeamColor color = ChessGame.TeamColor.BLACK;
+        ChessGame.TeamColor oppisteColor = ChessGame.TeamColor.WHITE;
+        if (gameData.whiteUsername().equals(authData.username())){
+            color = ChessGame.TeamColor.WHITE;
+            oppisteColor = ChessGame.TeamColor.BLACK;
+        }
+        if (game.isInCheck(color) || game.isInCheck(oppisteColor)){
+            return;
+        }
+        if (!piece.getTeamColor().equals(color) || game.getTeamTurn() != color){
+            throw new DataAccessException("Error: moved out of turn", 400);
+        }
         Collection<ChessMove> possibleMoves = piece.pieceMoves(game.getBoard(), move.getStartPosition());
         for (ChessMove m: possibleMoves){
             if (m.equals(move)){
@@ -137,6 +150,29 @@ public class ChessService {
             }
         }
         throw new DataAccessException("Error: invalid move", 400);
+    }
+
+    public void checkPlayer(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        AuthData authData = authaccess.getAuth(authToken);
+        if (!(gameData.whiteUsername().equals(authData.username()) || gameData.blackUsername().equals(authData.username()))){
+            throw new DataAccessException("Error: not in the game", 400);
+        }
+    }
+
+    public boolean checkResigned(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        return game.isResigned();
+    }
+
+    public void setResigned(String authToken, int gameID) throws DataAccessException {
+        checklogin(authToken);
+        GameData gameData = gameaccess.getGame(gameID);
+        ChessGame game = gameData.game();
+        game.setResigned();
     }
 
     public void clear() throws DataAccessException{

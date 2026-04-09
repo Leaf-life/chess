@@ -12,6 +12,7 @@ public class ChessGame {
 
     private ChessGame.TeamColor team;
     private ChessBoard board = new ChessBoard();
+    private boolean resigned = false;
 
     @Override
     public boolean equals(Object o) {
@@ -30,6 +31,14 @@ public class ChessGame {
     public ChessGame() {
         board.resetBoard();
         team = TeamColor.WHITE;
+    }
+
+    public boolean isResigned(){
+        return resigned;
+    }
+
+    public void setResigned(){
+        resigned = true;
     }
 
     /**

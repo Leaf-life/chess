@@ -29,6 +29,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private final ConnectionManager connections = new ConnectionManager();
     private final Server server;
     ChessService service;
+    private boolean resigned = false;
 
     public WebSocketHandler(ChessService service, Server server) {
         this.service = service;
@@ -101,14 +102,28 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     }
 
+    private void checkResigned() throws DataAccessException {
+        if (resigned){
+            throw new DataAccessException("Error: you have resigned", 400);
+        }
+    }
+
     private void makeMove(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         MakeMoveCommand makeMoveCommand = new Gson().fromJson(ctx.message(), MakeMoveCommand.class);
         try {
-            service.checkMove(authTocken, gameID, makeMoveCommand.getMove());
-            var message = String.format("Player made move");
-            var notification = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
-            connections.broadcast(session, notification, message);
-            connections.send(session, notification, message);
+            if(!service.checkResigned(makeMoveCommand.getAuthToken(), gameID)) {
+                service.checkMove(makeMoveCommand.getAuthToken(), gameID, makeMoveCommand.getMove());
+                var message = String.format("Player made move");
+                var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
+                var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                connections.broadcast(session, loadGameMessage, message);
+                connections.broadcast(session, notificationMessage, message);
+                connections.send(session, loadGameMessage, message);
+            }else {
+                var message = String.format("you resigned");
+                var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                connections.send(session, notificationMessage, message);
+            }
         } catch (DataAccessException e) {
             var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
             connections.send(session, notification, e.getMessage());
@@ -117,16 +132,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
 
     private void leave(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         var message = String.format("Player has left");
-        //var notification = new NotificationMessage(ServerMessage.ServerMessageType.LOAD_GAME, gameID);
-        //connections.broadcast(session, notification, message);
+        var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        connections.broadcast(session, notification, message);
         connections.remove(session);
     }
 
     private void resign(Session session, String authTocken, WsMessageContext ctx, int gameID) throws IOException{
         var message = String.format("Player has resigned");
-        var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        connections.broadcast(session, notification, message);
-        connections.remove(session);
+       ResignCommand resignCommand = new Gson().fromJson(ctx.message(), ResignCommand.class);
+        try {
+            if (!service.checkResigned(resignCommand.getAuthToken(), gameID)) {
+                service.setResigned(resignCommand.getAuthToken(), gameID);
+                var notification = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                service.checkPlayer(resignCommand.getAuthToken(), gameID);
+                connections.broadcast(session, notification, message);
+                connections.send(session, notification, message);
+            } else {
+                message = String.format("you resigned");
+                var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                connections.send(session, notificationMessage, message);
+            }
+            //connections.remove(session);
+        } catch (DataAccessException e) {
+            var notification = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, e.getMessage());
+            connections.send(session, notification, e.getMessage());
+        }
     }
 
     public void makeNoise(String petName, String sound) throws ResponseException {
