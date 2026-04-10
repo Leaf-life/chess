@@ -112,7 +112,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 ChessGame game = gameData.game();
                 boolean isCheckMate = service.isCheckMate(makeMoveCommand.getAuthToken(), gameID);
                 String message = String.format("Player: %s made move %s", username, makeMoveCommand.getMove().toString());
-                if (service.isCheck(makeMoveCommand.getAuthToken(), gameID)){
+                if (service.isCheck(makeMoveCommand.getAuthToken(), gameID) && !isCheckMate){
                     String checkUser = username;
                     if (checkUser.equals(gameData.whiteUsername())){
                         checkUser = gameData.blackUsername();
@@ -126,19 +126,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.broadcast(gameID, session, loadGameMessage, message);
                 connections.broadcast(gameID, session, notificationMessage, message);
                 connections.send(session, loadGameMessage, message);
-                if (isCheckMate){
-                    message = String.format("checkMate");
-                    notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                if (service.isCheck(makeMoveCommand.getAuthToken(), gameID) && !isCheckMate){
                     connections.send(session, notificationMessage, message);
-                    connections.broadcast(gameID, session, notificationMessage, message);
-                }/*
-                if (service.isStalemate(makeMoveCommand.getAuthToken(), gameID)){
-                    message = String.format("Stale Mate");
+                }
+                if (isCheckMate){
+                    String checkUser = username;
+                    if (checkUser.equals(gameData.whiteUsername())){
+                        checkUser = gameData.blackUsername();
+                    } else{
+                        checkUser = gameData.whiteUsername();
+                    }
+                    message = String.format("checkMate %s", checkUser);
                     notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
                     connections.send(session, notificationMessage, message);
                     connections.broadcast(gameID, session, notificationMessage, message);
                 }
-                */
             }else {
                 var message = String.format("%s resigned", username);
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);

@@ -137,7 +137,7 @@ public class GameClient implements ServerMessageHandler {
                 getBoard();
                 return "Move made";
             } catch (Exception e) {
-                throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
+                throw new ResponseException(ResponseException.Code.ServerError, "bad input");
             }
         }
         throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position, end position, and promotion piece (None if no promo)");
@@ -149,8 +149,8 @@ public class GameClient implements ServerMessageHandler {
                 String pos = params[0];
                 int y = Integer.parseInt(pos.substring(1));
                 int x = posConverter(pos.substring(0,1));
-                ChessPiece piece = game.getBoard().getPiece(new ChessPosition(y, x));
-                moves = piece.pieceMoves(game.getBoard(), new ChessPosition(y, x));
+                //ChessPiece piece = game.getBoard().getPiece(new ChessPosition(y, x));
+                moves = game.validMoves(new ChessPosition(y, x));
 
                 return "Your possible moves:\n" + printBoard();
             }
