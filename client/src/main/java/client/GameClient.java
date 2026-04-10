@@ -231,7 +231,6 @@ public class GameClient implements ServerMessageHandler {
                 result.append(SET_BG_COLOR_LIGHT_GREY);
             }
         }
-        result.append(boardCheck(x, y));
         ChessPiece piece = board.getPiece(new ChessPosition(x, y));
         result.append(getPieceSymbol(piece));
         return result;
