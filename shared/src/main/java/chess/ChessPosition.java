@@ -52,14 +52,14 @@ public class ChessPosition {
     public String toString(){
         String column = "";
         switch (col){
-            case 1 -> column = "h";
-            case 2 -> column = "g";
-            case 3 -> column = "f";
-            case 4 -> column = "e";
-            case 5 -> column = "d";
-            case 6 -> column = "c";
-            case 7 -> column = "b";
-            case 8 -> column = "a";
+            case 1 -> column = "a";
+            case 2 -> column = "b";
+            case 3 -> column = "c";
+            case 4 -> column = "d";
+            case 5 -> column = "e";
+            case 6 -> column = "f";
+            case 7 -> column = "g";
+            case 8 -> column = "h";
         }
         return column + String.valueOf(row);
     }

@@ -78,13 +78,13 @@ public class ChessBoard {
                 case ChessPiece.PieceType.KING: {
                     //resetAddPiece(ChessGame.TeamColor.BLACK, p, 4, 7);
                     //resetAddPiece(ChessGame.TeamColor.WHITE, p, 4, 0);
-                    addPiece(new ChessPosition(8, 4), new ChessPiece(ChessGame.TeamColor.BLACK, p));
-                    addPiece(new ChessPosition(1, 4), new ChessPiece(ChessGame.TeamColor.WHITE, p));
+                    addPiece(new ChessPosition(8, 5), new ChessPiece(ChessGame.TeamColor.BLACK, p));
+                    addPiece(new ChessPosition(1, 5), new ChessPiece(ChessGame.TeamColor.WHITE, p));
                 }
                 break;
                 case ChessPiece.PieceType.QUEEN: {
-                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 4, 7);
-                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 4, 0);
+                    resetAddPiece(ChessGame.TeamColor.BLACK, p, 3, 7);
+                    resetAddPiece(ChessGame.TeamColor.WHITE, p, 3, 0);
                 }
                 break;
                 case ChessPiece.PieceType.ROOK: {

@@ -78,14 +78,14 @@ public class GameClient implements ServerMessageHandler {
     public int posConverter(String pos){
         int x = -1;
         switch (pos.substring(0, 1).toLowerCase()) {
-            case "a" -> x = 8;
-            case "b" -> x = 7;
-            case "c" -> x = 6;
-            case "d" -> x = 5;
-            case "e" -> x = 4;
-            case "f" -> x = 3;
-            case "g" -> x = 2;
-            case "h" -> x = 1;
+            case "a" -> x = 1;
+            case "b" -> x = 2;
+            case "c" -> x = 3;
+            case "d" -> x = 4;
+            case "e" -> x = 5;
+            case "f" -> x = 6;
+            case "g" -> x = 7;
+            case "h" -> x = 8;
         }
         if (Objects.equals(playColor, ChessGame.TeamColor.BLACK.toString())){
             x = Math.abs(x-9);
@@ -213,16 +213,16 @@ public class GameClient implements ServerMessageHandler {
         //getBoard();
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
-        if (Objects.equals(playColor, "black")) {
-            result.append(" " + " h  " + " g " +
-                    " f  " + " e " + "  d " + " c " + "  b " + "  a\n");
-            for (int x = 1; x <= 8; x++) {
+        if (Objects.equals(playColor, "white")) {
+            result.append(" " + " a  " + " b " +
+                    " c  " + " d " + "  e " + " f " + "  g " + "  h\n");
+            for (int x = 8; x >= 1; x--) {
                 result.append(String.valueOf(x));
                 for (int y = 1; y <= 8; y++) {
                     boolean move = false;
                     if (moves != null) {
                         for (ChessMove m : moves) {
-                            if (m.getEndPosition().equals(new ChessPosition(x, y))) {
+                            if (m.getEndPosition().equals(new ChessPosition(x, y)) || m.getStartPosition().equals(new ChessPosition(x, y))) {
                                 result.append(SET_BG_COLOR_YELLOW);
                                 move = true;
                             }
@@ -230,13 +230,13 @@ public class GameClient implements ServerMessageHandler {
                     }
                     if (!move) {
                         if (y % 2 == 0 && x % 2 == 0) {
-                            result.append(SET_BG_COLOR_LIGHT_GREY);
+                            result.append(SET_BG_COLOR_DARK_GREY);
                         } else if (y % 2 == 1 && x % 2 == 1) {
-                            result.append(SET_BG_COLOR_LIGHT_GREY);
+                            result.append(SET_BG_COLOR_DARK_GREY);
                         } else if (y % 2 == 0 && x % 2 == 1) {
-                            result.append(SET_BG_COLOR_DARK_GREY);
+                            result.append(SET_BG_COLOR_LIGHT_GREY);
                         } else {
-                            result.append(SET_BG_COLOR_DARK_GREY);
+                            result.append(SET_BG_COLOR_LIGHT_GREY);
                         }
                     }
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
@@ -246,9 +246,9 @@ public class GameClient implements ServerMessageHandler {
                 result.append("\n");
             }
         } else {
-            result.append("   " + " a  " + " b " +
-                    " c  " + " d " + "  e " + " f " + "  g " + "  h\n");
-            for (int x = 8; x >= 1; x--) {
+            result.append("   " + " h  " + " g " +
+                    " f  " + " e " + "  d " + " c " + "  b " + "  a\n");
+            for (int x = 1; x <= 8; x++) {
                 result.append(" ")
                         .append(String.valueOf(x))
                         .append(" ");
