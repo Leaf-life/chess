@@ -140,7 +140,7 @@ public class GameClient implements ServerMessageHandler {
                 throw new ResponseException(ResponseException.Code.ServerError, e.getMessage());
             }
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position, end position, and promotion piece (None is doesnt exists)");
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position, end position, and promotion piece (None if no promo)");
     }
 
     public String showMoves(String... params) throws ResponseException {

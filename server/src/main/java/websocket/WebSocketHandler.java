@@ -93,7 +93,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
          if (!observer) {
              ConnectCommand command = new Gson().fromJson(ctx.message(), ConnectCommand.class);
              var message = String.format("Player: %s has joined", username);
-             var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, service.getGame(command.getAuthToken(), gameID).game());
+             ChessGame game = service.getGame(command.getAuthToken(), gameID).game();
+             var loadGameMessage = new LoadGameMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
              var notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
              connections.broadcast(gameID, session, notificationMessage, message);
              connections.send(session, loadGameMessage, message);
@@ -125,15 +126,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.broadcast(gameID, session, loadGameMessage, message);
                 connections.broadcast(gameID, session, notificationMessage, message);
                 connections.send(session, loadGameMessage, message);
-                //if (service.isCheck(makeMoveCommand.getAuthToken(), gameID)){
-                //    connections.send(session, notificationMessage, message);
-                //}
                 if (isCheckMate){
                     message = String.format("checkMate");
                     notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
                     connections.send(session, notificationMessage, message);
                     connections.broadcast(gameID, session, notificationMessage, message);
+                }/*
+                if (service.isStalemate(makeMoveCommand.getAuthToken(), gameID)){
+                    message = String.format("Stale Mate");
+                    notificationMessage = new NotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+                    connections.send(session, notificationMessage, message);
+                    connections.broadcast(gameID, session, notificationMessage, message);
                 }
+                */
             }else {
                 var message = String.format("%s resigned", username);
                 var errorMessage = new ErrorMessage(ServerMessage.ServerMessageType.ERROR, message);
@@ -174,15 +179,4 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             connections.send(session, notification, e.getMessage());
         }
     }
-    /*
-    public void makeNoise(String petName, String sound) throws ResponseException {
-        try {
-            var message = String.format("%s says %s", petName, sound);
-            var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION);
-            connections.broadcast( notification, message);
-        } catch (Exception ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
-        }
-    }
-     */
 }
