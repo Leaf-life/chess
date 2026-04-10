@@ -140,7 +140,7 @@ public class GameClient implements ServerMessageHandler {
                 throw new ResponseException(ResponseException.Code.ServerError, "bad input");
             }
         }
-        throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece position, end position, and promotion piece (None if no promo)");
+        throw new ResponseException(ResponseException.Code.ClientError, "Expected: piece pos, end pos, and promo piece (None if no promo)");
     }
 
     public String showMoves(String... params) throws ResponseException {
@@ -209,8 +209,57 @@ public class GameClient implements ServerMessageHandler {
         return symbol;
     }
 
+    public StringBuilder whiteBoardCheck(int x, int y){
+        StringBuilder result = new StringBuilder();
+        boolean move = false;
+        if (moves != null) {
+            for (ChessMove m : moves) {
+                if (m.getEndPosition().equals(new ChessPosition(x, y)) || m.getStartPosition().equals(new ChessPosition(x, y))) {
+                    result.append(SET_BG_COLOR_YELLOW);
+                    move = true;
+                }
+            }
+        }
+        if (!move) {
+            if (y % 2 == 0 && x % 2 == 0) {
+                result.append(SET_BG_COLOR_DARK_GREY);
+            } else if (y % 2 == 1 && x % 2 == 1) {
+                result.append(SET_BG_COLOR_DARK_GREY);
+            } else if (y % 2 == 0 && x % 2 == 1) {
+                result.append(SET_BG_COLOR_LIGHT_GREY);
+            } else {
+                result.append(SET_BG_COLOR_LIGHT_GREY);
+            }
+        }
+        return result;
+    }
+
+    public StringBuilder blackBoardCheck(int x, int y){
+        StringBuilder result = new StringBuilder();
+        boolean move = false;
+        if (moves != null) {
+            for (ChessMove m : moves) {
+                if (m.getEndPosition().equals(new ChessPosition(x, y)) || m.getStartPosition().equals(new ChessPosition(x, y))) {
+                    result.append(SET_BG_COLOR_YELLOW);
+                    move = true;
+                }
+            }
+        }
+        if (!move) {
+            if (y % 2 == 0 && x % 2 == 0) {
+                result.append(SET_BG_COLOR_LIGHT_GREY);
+            } else if (y % 2 == 1 && x % 2 == 1) {
+                result.append(SET_BG_COLOR_LIGHT_GREY);
+            } else if (y % 2 == 0 && x % 2 == 1) {
+                result.append(SET_BG_COLOR_DARK_GREY);
+            } else {
+                result.append(SET_BG_COLOR_DARK_GREY);
+            }
+        }
+        return result;
+    }
+
     public String printBoard() throws ResponseException {
-        //getBoard();
         ChessBoard board = game.getBoard();
         StringBuilder result = new StringBuilder();
         if (Objects.equals(playColor, "white")) {
@@ -219,26 +268,7 @@ public class GameClient implements ServerMessageHandler {
             for (int x = 8; x >= 1; x--) {
                 result.append(String.valueOf(x));
                 for (int y = 1; y <= 8; y++) {
-                    boolean move = false;
-                    if (moves != null) {
-                        for (ChessMove m : moves) {
-                            if (m.getEndPosition().equals(new ChessPosition(x, y)) || m.getStartPosition().equals(new ChessPosition(x, y))) {
-                                result.append(SET_BG_COLOR_YELLOW);
-                                move = true;
-                            }
-                        }
-                    }
-                    if (!move) {
-                        if (y % 2 == 0 && x % 2 == 0) {
-                            result.append(SET_BG_COLOR_DARK_GREY);
-                        } else if (y % 2 == 1 && x % 2 == 1) {
-                            result.append(SET_BG_COLOR_DARK_GREY);
-                        } else if (y % 2 == 0 && x % 2 == 1) {
-                            result.append(SET_BG_COLOR_LIGHT_GREY);
-                        } else {
-                            result.append(SET_BG_COLOR_LIGHT_GREY);
-                        }
-                    }
+                    result.append(whiteBoardCheck(x, y));
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append(getPieceSymbol(piece));
                 }
@@ -253,26 +283,7 @@ public class GameClient implements ServerMessageHandler {
                         .append(String.valueOf(x))
                         .append(" ");
                 for (int y = 8; y >= 1; y--) {
-                    boolean move = false;
-                    if (moves != null) {
-                        for (ChessMove m : moves) {
-                            if (m.getEndPosition().equals(new ChessPosition(x, y))) {
-                                result.append(SET_BG_COLOR_YELLOW);
-                                move = true;
-                            }
-                        }
-                    }
-                    if (!move) {
-                        if (y % 2 == 0 && x % 2 == 0) {
-                            result.append(SET_BG_COLOR_LIGHT_GREY);
-                        } else if (y % 2 == 1 && x % 2 == 1) {
-                            result.append(SET_BG_COLOR_LIGHT_GREY);
-                        } else if (y % 2 == 0 && x % 2 == 1) {
-                            result.append(SET_BG_COLOR_DARK_GREY);
-                        } else {
-                            result.append(SET_BG_COLOR_DARK_GREY);
-                        }
-                    }
+                    result.append(blackBoardCheck(x, y));
                     ChessPiece piece = board.getPiece(new ChessPosition(x, y));
                     result.append(getPieceSymbol(piece));
                 }

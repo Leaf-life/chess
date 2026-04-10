@@ -212,16 +212,6 @@ public class ChessService {
         return false;
     }
 
-    public boolean isStalemate(String authToken, int gameID) throws DataAccessException {
-        checklogin(authToken);
-        GameData gameData = gameaccess.getGame(gameID);
-        ChessGame game = gameData.game();
-        if  (game.isInStalemate(ChessGame.TeamColor.WHITE) || game.isInStalemate(ChessGame.TeamColor.BLACK)){
-            return true;
-        }
-        return false;
-    }
-
     public void checkPlayer(String authToken, int gameID) throws DataAccessException {
         checklogin(authToken);
         GameData gameData = gameaccess.getGame(gameID);
