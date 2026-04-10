@@ -209,7 +209,7 @@ public class GameClient implements ServerMessageHandler {
         return symbol;
     }
 
-    public StringBuilder boardCheck(int x, int y){
+    public StringBuilder boardCheck(int x, int y, ChessBoard board){
         StringBuilder result = new StringBuilder();
         boolean move = false;
         if (moves != null) {
@@ -231,6 +231,9 @@ public class GameClient implements ServerMessageHandler {
                 result.append(SET_BG_COLOR_LIGHT_GREY);
             }
         }
+        result.append(boardCheck(x, y));
+        ChessPiece piece = board.getPiece(new ChessPosition(x, y));
+        result.append(getPieceSymbol(piece));
         return result;
     }
 
@@ -243,9 +246,7 @@ public class GameClient implements ServerMessageHandler {
             for (int x = 8; x >= 1; x--) {
                 result.append(String.valueOf(x));
                 for (int y = 1; y <= 8; y++) {
-                    result.append(boardCheck(x, y));
-                    ChessPiece piece = board.getPiece(new ChessPosition(x, y));
-                    result.append(getPieceSymbol(piece));
+                    result.append(boardCheck(x, y, board));
                 }
                 result.append(RESET_BG_COLOR);
                 result.append("\n");
@@ -258,9 +259,7 @@ public class GameClient implements ServerMessageHandler {
                         .append(String.valueOf(x))
                         .append(" ");
                 for (int y = 8; y >= 1; y--) {
-                    result.append(boardCheck(x, y));
-                    ChessPiece piece = board.getPiece(new ChessPosition(x, y));
-                    result.append(getPieceSymbol(piece));
+                    result.append(boardCheck(x, y, board));
                 }
                 result.append(RESET_BG_COLOR);
                 result.append("\n");
