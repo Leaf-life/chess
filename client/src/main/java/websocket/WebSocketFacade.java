@@ -39,18 +39,20 @@ public class WebSocketFacade extends Endpoint {
                     switch (notification.getServerMessageType()){
                         case NOTIFICATION -> serverMessage.notificationMessage(new Gson().fromJson(message, NotificationMessage.class));
                         case ERROR -> serverMessage.errorMessage(new Gson().fromJson(message, ErrorMessage.class));
-                        case LOAD_GAME -> {
-                            try {
-                                serverMessage.loadGameMessage(new Gson().fromJson(message, LoadGameMessage.class));
-                            } catch (ResponseException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+                        case LOAD_GAME -> proccessLoadGame(message);
                     }
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
             throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+        }
+    }
+
+    private void proccessLoadGame(String message){
+        try {
+            serverMessage.loadGameMessage(new Gson().fromJson(message, LoadGameMessage.class));
+        } catch (ResponseException e) {
+            throw new RuntimeException(e);
         }
     }
 
